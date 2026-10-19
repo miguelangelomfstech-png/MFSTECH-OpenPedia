@@ -21,8 +21,10 @@ const csp = [
 ].join("; ");
 
 const config: NextConfig = {
-  output: "standalone",
-  outputFileTracingRoot: path.resolve(process.cwd(), "../.."),
+  ...(process.env.VERCEL ? {} : {
+    output: "standalone",
+    outputFileTracingRoot: path.resolve(process.cwd(), "../.."),
+  }),
   transpilePackages: ["@wiki/db", "@wiki/shared"],
   serverExternalPackages: ["ioredis", "bullmq", "pg", "bcryptjs"],
   poweredByHeader: false,
