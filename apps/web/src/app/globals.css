@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif-4), Georgia, "Times New Roman", serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-red: var(--red);
+}
+
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --ink: #1c1917;
+  --muted: #57534e;       /* 7.5:1 on bg, passes AA */
+  --line: #e7e5e4;
+  --accent: #3730a3;      /* 9.9:1 on white */
+  --accent-ink: #ffffff;
+  --red: #b91c1c;
+}
+[data-theme="dark"] {
+  --bg: #0c0a09;
+  --surface: #1c1917;
+  --ink: #f5f5f4;
+  --muted: #a8a29e;
+  --line: #292524;
+  --accent: #a5b4fc;
+  --accent-ink: #1e1b4b;
+  --red: #f87171;
+}
+
+html { color-scheme: light dark; }
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem; border-radius: .6rem; padding: .5rem .9rem;
+  font-weight: 600; font-size: .9rem; border: 1px solid var(--line); background: var(--surface);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease; cursor: pointer; min-height: 2.5rem;
+}
+.btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn-danger { color: var(--red); }
+.input {
+  width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: .6rem;
+  padding: .6rem .8rem; min-height: 2.5rem;
+}
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
+
+/* Article typography */
+.wiki-body { font-family: var(--font-serif); font-size: 1.075rem; line-height: 1.75; }
+.wiki-body h1, .wiki-body h2, .wiki-body h3 { font-family: var(--font-serif); scroll-margin-top: 5rem; }
+.wiki-body h2 { border-bottom: 1px solid var(--line); padding-bottom: .25rem; margin-top: 2rem; font-size: 1.6rem; }
+.wiki-body a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.wiki-body a.redlink { color: var(--red); }
+.wiki-body figure.wiki-figure { margin: 1.5rem 0; border: 1px solid var(--line); border-radius: .75rem; overflow: hidden; background: var(--surface); }
+@media (min-width: 768px) { .wiki-body figure.wiki-figure { float: right; width: min(22rem, 45%); margin: .25rem 0 1rem 1.5rem; } }
+.wiki-body figure.wiki-figure img, .wiki-body figure.wiki-figure video { width: 100%; height: auto; display: block; }
+.wiki-body figcaption { padding: .6rem .8rem; font-size: .85rem; color: var(--muted); font-family: var(--font-sans); }
+.wiki-body section[data-footnotes] { clear: both; border-top: 1px solid var(--line); margin-top: 2rem; font-size: .9rem; }
+.wiki-body h2 { clear: both; }
+.wiki-body sup a { text-decoration: none; }
+
+.diff-add { background: color-mix(in srgb, #16a34a 22%, transparent); }
+.diff-del { background: color-mix(in srgb, #dc2626 22%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,106 @@
+# Production stack for a single Docker host (VPS / dedicated).
+# Postgres, Redis and Meilisearch run locally; media lives in Cloudflare R2 / S3.
+# Deploy with deploy/deploy.sh (zero-downtime), not with a bare `up -d`.
+name: openpedia
+
+x-app-env: &app-env
+  env_file: .env.production
+  restart: unless-stopped
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "5" } }
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web]
+    networks: [edge, internal]
+
+  web:
+    <<: *app-env
+    build: { context: ., target: web }
+    image: ${REGISTRY:-ghcr.io/your-org}/openpedia-web:${TAG:-latest}
+    expose: ["3000"]
+    deploy: { resources: { limits: { memory: 768m } } }
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [internal]
+
+  worker:
+    <<: *app-env
+    build: { context: ., target: worker }
+    image: ${REGISTRY:-ghcr.io/your-org}/openpedia-worker:${TAG:-latest}
+    # FFmpeg is CPU heavy: pin it so it cannot starve the web tier.
+    deploy: { resources: { limits: { cpus: "2.0", memory: 2g } } }
+    stop_grace_period: 60s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [internal]
+
+  migrate:
+    <<: *app-env
+    restart: "no"
+    build: { context: ., target: tools }
+    image: ${REGISTRY:-ghcr.io/your-org}/openpedia-tools:${TAG:-latest}
+    profiles: [tools]
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wiki}
+      POSTGRES_DB: ${POSTGRES_DB:-wiki}
+    command: ["postgres", "-c", "shared_buffers=256MB", "-c", "max_connections=100", "-c", "wal_level=replica"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wiki}"]
+      interval: 10s
+      retries: 10
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD}"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks: [internal]
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?set MEILI_MASTER_KEY}
+      MEILI_NO_ANALYTICS: "true"
+    volumes: [meilidata:/meili_data]
+    networks: [internal]
+
+networks:
+  edge: {}
+  internal: { internal: false }
+
+volumes:
+  pgdata:
+  redisdata:
+  meilidata:
+  caddy_data:
+  caddy_config:

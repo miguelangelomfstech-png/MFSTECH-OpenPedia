@@ -1,0 +1,37 @@
+{
+	email {$ACME_EMAIL}
+}
+
+(security) {
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+	encode zstd gzip
+}
+
+{$SITE_DOMAIN} {
+	import security
+
+	# Resolves every `web` container, so new replicas receive traffic during a rolling deploy
+	# and old ones are drained once they fail the health check.
+	reverse_proxy {
+		dynamic a web 3000
+		lb_policy least_conn
+		lb_try_duration 10s
+		health_uri /api/health
+		health_interval 5s
+		health_timeout 3s
+		fail_duration 10s
+		# Caddy overwrites X-Forwarded-For from untrusted clients; the app trusts the first entry.
+	}
+
+	request_body {
+		max_size 2MB
+	}
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
