@@ -140,8 +140,13 @@ export async function register(_prev: FormState, fd: FormData): Promise<FormStat
   const dupe = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
   const nameDupe = await db.select({ id: users.id }).from(users).where(eq(users.name, name));
   if (dupe.length || nameDupe.length) return { error: "That name or email is already registered." };
-  await db.insert(users).values({ name, email, passwordHash: await bcrypt.hash(password, 12) });
-  await signIn("credentials", { email, password, redirectTo: "/" });
+  await db.insert(users).values({ name, email, passwordHash: await bcrypt.hash(password, 10) });
+  try {
+    await signIn("credentials", { email, password, redirectTo: "/" });
+  } catch (e) {
+    if (e instanceof AuthError) return { error: "Account created! Please sign in on the login page." };
+    throw e;
+  }
 }
 
 export async function login(_prev: FormState, fd: FormData): Promise<FormState> {

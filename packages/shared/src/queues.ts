@@ -14,7 +14,13 @@ const g = globalThis as unknown as { __redis?: IORedis; __queues?: Record<string
 
 /** Shared connection for general use (rate limiting, cache). */
 export function redis(): IORedis {
-  return (g.__redis ??= new IORedis(env().REDIS_URL, { maxRetriesPerRequest: null }));
+  return (g.__redis ??= new IORedis(env().REDIS_URL, {
+    maxRetriesPerRequest: 1,
+    connectTimeout: 800,
+    enableOfflineQueue: false,
+    lazyConnect: true,
+    retryStrategy: () => null,
+  }));
 }
 
 /** BullMQ requires its own connection config with maxRetriesPerRequest=null. */
