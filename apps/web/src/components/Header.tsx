@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { db, notifications, eq, and, count } from "@wiki/db";
 import { getViewer } from "@/lib/viewer";
-import { getT } from "@/lib/i18n";
+import { getT, getLocale } from "@/lib/i18n";
 import { logout } from "@/app/actions";
 import { SearchBox } from "./SearchBox";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSelector } from "./LanguageSelector";
 
 export async function Header() {
-  const t = await getT();
+  const [t, locale] = [await getT(), await getLocale()];
   const { user } = await getViewer();
   let unread = 0;
   if (user) {
@@ -48,6 +49,7 @@ export async function Header() {
               <Link className="btn btn-primary" href="/register">{t("register")}</Link>
             </>
           )}
+          <LanguageSelector currentLocale={locale} />
           <ThemeToggle />
         </nav>
       </div>

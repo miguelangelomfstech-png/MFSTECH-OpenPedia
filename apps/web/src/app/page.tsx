@@ -30,11 +30,11 @@ export default async function Home() {
           />
           <span className="text-xs font-semibold uppercase tracking-wider text-white">MFSTECH-OpenPedia</span>
         </div>
-        <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-6xl">The free encyclopedia<br />anyone can edit.</h1>
-        <p className="mt-4 max-w-xl text-lg text-white/90">Read, write and illustrate articles with images and video. Every change is tracked, every page is open.</p>
+        <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-6xl">{t("heroTitle")}</h1>
+        <p className="mt-4 max-w-xl text-lg text-white/90">{t("heroSubtitle")}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/wiki/sandbox/edit" className="btn !border-white !bg-white !text-indigo-900">Start writing</Link>
-          <Link href="/recent" className="btn !border-white/60 !bg-transparent !text-white">Recent changes</Link>
+          <Link href="/wiki/sandbox/edit" className="btn !border-white !bg-white !text-indigo-900">{t("startWriting")}</Link>
+          <Link href="/recent" className="btn !border-white/60 !bg-transparent !text-white">{t("recent")}</Link>
         </div>
       </section>
 
@@ -44,11 +44,11 @@ export default async function Home() {
             <h2 id="featured" className="text-sm font-semibold uppercase tracking-wide text-accent">★ {t("featured")}</h2>
             <h3 className="mt-2 font-serif text-3xl font-bold"><Link href={`/wiki/${featured.slug}`}>{featured.title}</Link></h3>
             <p className="wiki-body mt-3 text-muted">{toPlainText(featured.content).slice(0, 360)}…</p>
-            <Link className="mt-3 inline-block font-semibold text-accent underline" href={`/wiki/${featured.slug}`}>Read the full article →</Link>
+            <Link className="mt-3 inline-block font-semibold text-accent underline" href={`/wiki/${featured.slug}`}>{t("readFullArticle")}</Link>
           </section>
         )}
         <section aria-labelledby="recent" className="card p-6">
-          <h2 id="recent" className="font-semibold">Recently updated</h2>
+          <h2 id="recent" className="font-semibold">{t("recentlyUpdated")}</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {recent.map((r) => (
               <li key={r.slug} className="flex justify-between gap-2">
@@ -63,7 +63,7 @@ export default async function Home() {
 
       {latestMedia.length > 0 && (
         <section aria-labelledby="media">
-          <h2 id="media" className="mb-4 font-semibold">New media</h2>
+          <h2 id="media" className="mb-4 font-semibold">{t("newMedia")}</h2>
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {latestMedia.map((m) => (
               <li key={m.slug}>
