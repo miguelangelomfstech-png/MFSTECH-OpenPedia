@@ -222,3 +222,28 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
 - **Passos**: Requisição GET a `/sitemap.xml`.
 - **Resultado Esperado**: Retorna HTTP 200 com XML válido contendo URLs dos artigos da enciclopédia.
 - **Status**: **PASSOU** (Automatizado via `07-api-endpoints.spec.ts`).
+
+---
+
+### TS-11: Assistente de Pesquisa com IA Gratuita
+
+#### TC-026: Geração de Conteúdo com IA Gratuita via Endpoint `/api/ai-research`
+- **Pré-condições**: Servidor em execução.
+- **Passos**:
+  1. Enviar requisição POST para `/api/ai-research` com payload JSON `{"query": "Sistema Solar", "mode": "summary", "language": "pt"}`.
+- **Resultado Esperado**: Retorna HTTP 200, texto factual de pelo menos 20 caracteres e URLs complementares para Perplexity AI e DuckDuckGo AI.
+- **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
+
+#### TC-027: Abertura da Janela Modal e Cópia para a Área de Transferência
+- **Passos**:
+  1. Clicar no botão `✨ Pesquisa IA` no cabeçalho ou no editor.
+  2. Digitar "Telescópio Espacial" e submeter.
+  3. Aguardar a resposta da IA.
+  4. Clicar em "Copiar Resposta".
+- **Resultado Esperado**: A resposta gerada é exibida na área de texto e o botão de cópia atualiza o texto para "✓ Copiado!", gravando o conteúdo na área de transferência do utilizador para colar em qualquer campo.
+- **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
+
+#### TC-028: Presença de Links Externos Gratuitos (Perplexity e DuckDuckGo AI)
+- **Passos**: Inspecionar a seção de links externos na janela modal de pesquisa IA.
+- **Resultado Esperado**: Apresenta links diretos para Perplexity AI e DuckDuckGo AI Chat com a pesquisa do utilizador codificada.
+- **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).

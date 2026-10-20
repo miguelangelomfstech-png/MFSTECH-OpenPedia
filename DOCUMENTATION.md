@@ -85,10 +85,16 @@ NewProject/
   - Miniaturas WebP (`thumb-400`, `webp-800`, `webp-1600`);
   - Vídeos H.264/AAC otimizados para streaming web (`360p`, `720p`, `1080p`).
 
-### 3.7. APIs Abertas (REST e GraphQL)
-- **GraphQL (`/api/graphql`)**: Endpoint acionado por Yoga GraphQL para consultar artigos, revisões, multimédia e pesquisas com tipagem forte.
-- **REST API (`/api/v1/articles`)**: Endpoint RESTful para consumo programático por terceiros.
-- **Healthcheck (`/api/health`)**: Monitorização de prontidão e vitalidade da base de dados e infraestrutura.
+### 3.8. Assistente de Pesquisa com IA Gratuita (`/api/ai-research` & `AiResearchModal`)
+- **Integração de IA Gratuita e Ilimitada**: Consulta o modelo gratuito OpenAI/Mistral (via endpoint direto de alto rendimento) sem requerer chave de API, cartão de crédito ou subscrições pagas.
+- **Janela Modal Interativa**: Acessível tanto no cabeçalho global quanto na barra de ferramentas do editor de artigos (`Editor.tsx`).
+- **Modos de Geração Adaptados**:
+  - *Artigo Completo*: Formata artigos neutros em Markdown com seções e subtítulos `##`.
+  - *Resumo*: Gera sínteses factuais em 2 a 3 parágrafos.
+  - *Tópicos / Factos*: Lista pontos-chave em bullet points.
+- **Cópia Instantânea para a Área de Transferência**: Botão com feedback visual imediato ("✓ Copiado!") para colar diretamente em qualquer campo ou editor do website.
+- **Inserção Direta no Editor**: Botão "Inserir no Artigo" que injeta o texto gerado na posição do cursor do editor Markdown.
+- **Atalhos Externos Gratuitos**: Links integrados para **Perplexity AI** e **DuckDuckGo AI Chat** com a pergunta já preenchida para pesquisa web aprofundada com fontes.
 
 ---
 

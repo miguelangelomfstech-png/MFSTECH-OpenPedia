@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useState, useTransition } from "react";
 import { saveArticle, previewMarkdown } from "@/app/actions";
+import { AiResearchModal } from "./AiResearchModal";
 
 type Props = {
   ns: "main" | "talk" | "category";
@@ -48,10 +49,24 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
           />
         </div>
       )}
-      <div role="toolbar" aria-label="Formatting" className="flex flex-wrap gap-1">
+      <div role="toolbar" aria-label="Formatting" className="flex flex-wrap items-center gap-1">
         {TOOLS.map(([label, aria, b, a]) => (
           <button key={label} type="button" className="btn !min-h-9 !px-3" aria-label={aria} onClick={() => wrap(b, a)}>{label}</button>
         ))}
+        <div className="ml-auto">
+          <AiResearchModal
+            triggerClassName="btn !min-h-9 !px-3 border-accent/50 bg-accent/15 text-accent font-semibold hover:bg-accent hover:text-accent-ink"
+            triggerLabel="✨ Pesquisa IA / AI Assistant"
+            onInsert={(txt) => {
+              const el = ta.current;
+              if (el) {
+                const { selectionStart: s, selectionEnd: e } = el;
+                el.setRangeText(txt + "\n\n", s, e, "end");
+                el.focus();
+              }
+            }}
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="content" className="mb-1 block text-sm font-semibold">Content (Markdown, limited HTML)</label>

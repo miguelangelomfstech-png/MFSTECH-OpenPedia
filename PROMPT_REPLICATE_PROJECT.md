@@ -68,9 +68,11 @@ You are tasked with building, configuring, branding, and deploying an enterprise
    - Page protection levels (`none`, `semi`, `full`) allowing admins to protect high-profile pages.
    - Personal watchlist (`/watchlist`) and in-app notifications for article changes.
 
-6. **Media Pipeline & Streaming**:
-   - Direct-to-storage presigned uploads for images and videos up to 1GB.
-   - Background transcoding producing adaptive resolutions (360p, 720p, 1080p MP4) and WebP responsive poster thumbnails.
+7. **Free AI Research Assistant with Direct Clipboard Copy & External Links**:
+   - Integrated floating and header/editor modal (`AiResearchModal.tsx`) allowing free, unlimited AI research directly inside the platform without any API key or subscription.
+   - Dedicated backend route `/api/ai-research` providing encyclopedic articles, summaries, and bullet points.
+   - One-click "📋 Copy Answer" button with clipboard integration and direct "📥 Insert into Article" action for the Markdown editor.
+   - Pre-built search deep-links for external free AI search engines (**Perplexity AI** and **DuckDuckGo AI Chat**) with prefilled queries.
 
 ---
 

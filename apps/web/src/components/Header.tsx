@@ -6,6 +6,7 @@ import { logout } from "@/app/actions";
 import { SearchBox } from "./SearchBox";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSelector } from "./LanguageSelector";
+import { AiResearchModal } from "./AiResearchModal";
 
 export async function Header() {
   const [t, locale] = [await getT(), await getLocale()];
@@ -33,6 +34,7 @@ export async function Header() {
         </Link>
         <div className="order-3 w-full md:order-none md:flex-1 md:px-6"><SearchBox placeholder={t("searchPlaceholder")} label={t("search")} /></div>
         <nav aria-label="Main" className="ml-auto flex items-center gap-2 text-sm">
+          <AiResearchModal currentLocale={locale} />
           <Link className="btn hidden sm:inline-flex" href="/recent">{t("recent")}</Link>
           <Link className="btn hidden sm:inline-flex" href="/upload">{t("upload")}</Link>
           {user ? (
