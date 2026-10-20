@@ -76,6 +76,9 @@ test.describe("10: AI Research Automatic Title Population in Editor", () => {
     const contentVal = await contentArea.inputValue();
     expect(contentVal.length).toBeGreaterThan(30);
 
+    // Append unique timestamp to avoid 'No changes were made' if article already existed
+    await contentArea.fill(contentVal + `\n\n*Publicado em: ${Date.now()}*`);
+
     // Save and publish article
     const submitBtn = page.locator("#save-article-btn");
     await submitBtn.click();
