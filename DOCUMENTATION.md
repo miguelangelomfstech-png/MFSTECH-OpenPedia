@@ -149,3 +149,23 @@ Variáveis de ambiente requeridas no Vercel:
 - `SITE_NAME`: "MFSTECH-OpenPedia"
 - `AUTH_SECRET`: Chave secreta aleatória de 32 bytes para assinatura de tokens de sessão.
 - `AUTH_TRUST_HOST`: "true"
+- `GOOGLE_API_KEY`: Chave da API Google Gemini para geração e pesquisa de IA de alta performance.
+
+---
+
+## 6. Assistente de Pesquisa com IA Integrado
+
+O MFSTECH-OpenPedia conta com um assistente de pesquisa inteligente e factual com interface modal centrada e atalhos globais no cabeçalho e na barra de ferramentas do editor:
+
+- **Motor Generativo Primário (Google Gemini)**: Processamento de perguntas complexas, científicas, históricas e técnicas em segundos, gerando artigos enciclopédicos estruturados em Markdown com seções lógicas, conceitos aprofundados e conclusões.
+- **Detetor Especializado de Receitas**: Consultas gastronómicas e culinárias são identificadas e respondidas diretamente com listas precisas de ingredientes e modo de preparo passo a passo, sem introduções históricas supérfluas.
+- **Extração Automática de Títulos**: O sistema deduz inteligentemente o título mais adequado para o tema pesquisado (corrigindo erros de digitação e removendo termos interrogativos) e preenche automaticamente o campo `(Title)` ao clicar em "Inserir no Artigo".
+- **Cascata Multi-Camadas (High-Resilience Fallback)**:
+  1. Google Gemini Flash (Alta velocidade e profundidade conceitual);
+  2. Wikilivros / Wikibooks Culinária;
+  3. Pollinations AI;
+  4. Wikipedia Factual Multi-Parágrafos;
+  5. DuckDuckGo Instant Answers;
+  6. Síntese Temática Conceitual Estruturada.
+- **Navegação Sem Interrupções**: Resposta 100% contida dentro da caixa de resposta, garantindo cópia imediata (`Ctrl+C` / botão de cópia com auto-fecho) ou inserção direta no editor com preenchimento simultâneo de título e corpo.
+
