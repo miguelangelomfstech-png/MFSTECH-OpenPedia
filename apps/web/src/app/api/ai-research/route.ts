@@ -18,6 +18,23 @@ const languageNames: Record<string, string> = {
   it: "Italiano",
 };
 
+function isRecipeQuery(q: string): boolean {
+  return /receita|ingrediente|como fazer|preparo|modo de preparo|bolo|torta|pão|doce|sobremesa|salgado|culin[aá]ria|recipe|cook|bake|receta|recette|ricetta/i.test(
+    q
+  );
+}
+
+function cleanRecipeSearchTerm(q: string): string {
+  let s = q.trim().replace(/[?.,!;:]/g, "");
+  s = s.replace(
+    /^(qual\s+a\s+receita\s+de\s+(fazer\s+)?|como\s+(fazer|preparar)\s+(um|uma)?\s*|receita\s+(de\s+)?|passo\s+a\s+passo\s+(de\s+)?)/i,
+    ""
+  );
+  s = s.replace(/^(what\s+is\s+the\s+recipe\s+for\s+|how\s+to\s+(make|bake|cook)\s+|recipe\s+for\s+)/i, "");
+  s = s.replace(/^(cu[aá]l\s+es\s+la\s+receta\s+de\s+|c[oó]mo\s+hacer\s+|receta\s+de\s+)/i, "");
+  return s.trim();
+}
+
 function normalizeSearchQueries(q: string, lang = "pt"): string[] {
   const clean = q.trim().replace(/[?.,!;:]/g, "");
   const list: string[] = [];
@@ -89,6 +106,69 @@ function normalizeSearchQueries(q: string, lang = "pt"): string[] {
     list.push(clean);
   }
   return list;
+}
+
+async function fetchWikibooksRecipe(query: string, lang = "pt", mode: "article" | "summary" | "bullet" = "article") {
+  const clean = cleanRecipeSearchTerm(query);
+  const searchTerms = [clean, `Livro de receitas/${clean}`, `Receita de ${clean}`];
+
+  for (const term of searchTerms) {
+    try {
+      const searchUrl = `https://${lang}.wikibooks.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&utf8=1&format=json`;
+      const res = await fetch(searchUrl, {
+        headers: { "User-Agent": "MFSTECH-OpenPedia/1.0" },
+        signal: AbortSignal.timeout(3500),
+      }).then((r) => r.json());
+
+      const results = res?.query?.search || [];
+      if (results.length > 0) {
+        const best =
+          results.find(
+            (r: { title: string }) =>
+              r.title.toLowerCase().includes("receita") || r.title.toLowerCase().includes(clean.toLowerCase())
+          ) || results[0];
+
+        const extUrl = `https://${lang}.wikibooks.org/w/api.php?action=query&prop=extracts&explaintext=1&titles=${encodeURIComponent(best.title)}&format=json`;
+        const extRes = await fetch(extUrl, {
+          headers: { "User-Agent": "MFSTECH-OpenPedia/1.0" },
+          signal: AbortSignal.timeout(3500),
+        }).then((r) => r.json());
+
+        const pages = extRes?.query?.pages || {};
+        const pageId = Object.keys(pages)[0];
+        const fullText = pages[pageId]?.extract as string | undefined;
+
+        if (fullText && fullText.length > 50) {
+          const displayTitle = best.title.replace(/^Livro de receitas\//i, "").trim();
+
+          if (mode === "summary") {
+            const shortText = fullText.slice(0, 600).trim();
+            return `## Receita de ${displayTitle}\n\n${shortText}`;
+          }
+
+          if (mode === "bullet") {
+            const lines = fullText
+              .split("\n")
+              .map((l: string) => l.trim())
+              .filter((l: string) => l.length > 5 && !l.startsWith("=="))
+              .slice(0, 10);
+            return `## Receita de ${displayTitle}\n\n` + lines.map((l: string) => `- ${l}`).join("\n");
+          }
+
+          let formatted = `## Receita de ${displayTitle}\n\n`;
+          formatted += fullText
+            .replace(/==+/g, "###")
+            .replace(/\n\s*\n\s*\n/g, "\n\n")
+            .trim();
+          formatted += `\n\n*Fonte verificada: [Wikilivros - ${best.title}](https://${lang}.wikibooks.org/wiki/${encodeURIComponent(best.title)})*`;
+          return formatted;
+        }
+      }
+    } catch {
+      // Continue
+    }
+  }
+  return null;
 }
 
 async function fetchWikiFactual(query: string, lang = "pt", mode: "article" | "summary" | "bullet" = "article") {
@@ -182,24 +262,32 @@ export async function POST(req: Request) {
 
     const { query, mode, language } = parsed.data;
     const targetLang = languageNames[language] ?? "Português";
+    const recipeQuery = isRecipeQuery(query);
 
     let instruction = "";
-    if (mode === "article") {
-      instruction = `Escreva um artigo enciclopédico factual, detalhado e neutro em Markdown no idioma ${targetLang} sobre: "${query}". Destaque nomes, datas e contexto histórico com títulos ##. Não adicione saudações.`;
+    if (recipeQuery) {
+      instruction = `Você é um assistente culinário prático e direto.
+Responda diretamente e com máxima precisão no idioma ${targetLang} ao pedido de receita: "${query}".
+Forneça os Ingredientes completos com medidas claras e o Modo de Preparo passo a passo numerado em Markdown.
+NÃO conte histórias sobre a origem ou história do prato. Vá direto aos ingredientes e ao modo de fazer.`;
+    } else if (mode === "article") {
+      instruction = `Você é um assistente enciclopédico factual e claro.
+Responda diretamente e com precisão no idioma ${targetLang} sobre: "${query}".
+Apresente os factos essenciais, contexto e detalhes explicados com títulos ## em Markdown. Não adicione saudações.`;
     } else if (mode === "summary") {
       instruction = `Responda de forma factual, concisa e direta em 2 a 3 parágrafos em ${targetLang} sobre: "${query}".`;
     } else {
-      instruction = `Liste em tópicos (bullet points) os principais factos, datas e informações essenciais em ${targetLang} sobre: "${query}".`;
+      instruction = `Liste em tópicos (bullet points) os principais factos, informações ou passos essenciais em ${targetLang} sobre: "${query}".`;
     }
 
     let generatedText = "";
 
-    // Strategy 1: Pollinations fast tier (with strict 3.5s timeout)
+    // Strategy 1: Pollinations generative tier with tailored intent prompt (strict 4s timeout)
     try {
       const getUrl = `https://text.pollinations.ai/${encodeURIComponent(instruction)}?model=openai-fast`;
       const res = await fetch(getUrl, {
         headers: { "User-Agent": "MFSTECH-OpenPedia/1.0" },
-        signal: AbortSignal.timeout(3500),
+        signal: AbortSignal.timeout(4000),
       });
 
       if (res.ok) {
@@ -215,10 +303,22 @@ export async function POST(req: Request) {
         }
       }
     } catch {
-      // Fast fallback to encyclopedic engine
+      // Continue to next tier
     }
 
-    // Strategy 2: 100% Reliable, Factual Real-Time Encyclopedic Resolver
+    // Strategy 2: If query is a recipe/culinary instruction, fetch from Wikibooks Recipes
+    if (!generatedText && recipeQuery) {
+      try {
+        const recipeResult = await fetchWikibooksRecipe(query, language, mode);
+        if (recipeResult && recipeResult.trim().length > 50) {
+          generatedText = recipeResult.trim();
+        }
+      } catch {
+        // Continue
+      }
+    }
+
+    // Strategy 3: Factual Encyclopedic Resolver from Wikipedia
     if (!generatedText) {
       try {
         const wikiResult = await fetchWikiFactual(query, language, mode);
@@ -230,7 +330,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // Strategy 3: DuckDuckGo Instant Answer API fallback
+    // Strategy 4: DuckDuckGo Instant Answer API fallback
     if (!generatedText) {
       try {
         const ddgRes = await fetch(
@@ -246,7 +346,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // Safe meaningful fallback if all online sources fail
+    // Safe fallback if all online sources fail
     if (!generatedText || generatedText.trim().length === 0) {
       generatedText = `Não foi possível obter uma resposta imediata para "${query}". Utilize os links abaixo do Perplexity ou DuckDuckGo AI para obter a resposta completa com um clique.`;
     }

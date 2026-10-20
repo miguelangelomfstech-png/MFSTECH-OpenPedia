@@ -22,6 +22,27 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     expect(data.duckduckgoUrl).toContain("duckduckgo.com");
   });
 
+  test("POST /api/ai-research answers recipe queries with ingredients and preparation steps (not history)", async ({
+    request,
+  }) => {
+    const res = await request.post("/api/ai-research", {
+      data: {
+        query: "Qual a receita de fazer um bolo de chocolate",
+        mode: "article",
+        language: "pt",
+      },
+    });
+
+    expect(res.status()).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveProperty("text");
+    expect(data.text.length).toBeGreaterThan(50);
+    // Must contain recipe content: ingredients or preparation
+    expect(data.text).toMatch(/ingrediente|preparo|margarina|manteiga|ovos|a[cç][uú]car|farinha|chocolate/i);
+    // Must NOT be purely the history of chocolate
+    expect(data.text).not.toContain("A história do bolo começou no antigo Egito");
+  });
+
   test("opens AI modal centered, answers query, closes on copy, esc and close button", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/");
@@ -64,16 +85,16 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     await expect(modal).toBeVisible();
 
     const queryInput = page.locator("#ai-query-input");
-    await queryInput.fill("quem descobriu o brasil");
+    await queryInput.fill("Qual a receita de fazer um bolo de chocolate");
 
     const searchBtn = modal.locator('button[type="submit"]');
     await searchBtn.click();
 
-    // Verify result textarea appears with factual content
+    // Verify result textarea appears with recipe content
     const resultTextarea = modal.locator("textarea");
     await expect(resultTextarea).toBeVisible({ timeout: 15000 });
     const content = await resultTextarea.inputValue();
-    expect(content).toMatch(/Cabral|1500|Portugal|Vera Cruz|Santa Cruz/i);
+    expect(content).toMatch(/ingrediente|preparo|margarina|manteiga|ovos|a[cç][uú]car|farinha|chocolate/i);
 
     // Verify copy button
     const copyBtn = page.locator("#ai-copy-btn");
