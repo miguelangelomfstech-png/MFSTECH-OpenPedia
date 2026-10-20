@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { dict, type Locale } from "@/lib/i18n-config";
 
 type Props = {
@@ -17,6 +18,7 @@ export function AiResearchModal({
   triggerLabel,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"article" | "summary" | "bullet">("article");
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,10 @@ export function AiResearchModal({
   const [copied, setCopied] = useState(false);
 
   const t = dict[currentLocale] ?? dict.pt;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,7 +89,11 @@ export function AiResearchModal({
       document.body.removeChild(textarea);
     }
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    // Auto-close modal after copying so user can immediately paste onto the site
+    setTimeout(() => {
+      setCopied(false);
+      setOpen(false);
+    }, 600);
   }
 
   function handleInsert() {
@@ -94,7 +104,7 @@ export function AiResearchModal({
       // Find editor textarea if on edit page
       const ta = document.getElementById("content") as HTMLTextAreaElement | null;
       if (ta && result) {
-        const { selectionStart: s, selectionEnd: e, value } = ta;
+        const { selectionStart: s, selectionEnd: e } = ta;
         ta.setRangeText(result + "\n\n", s, e, "end");
         ta.focus();
         setOpen(false);
@@ -120,17 +130,21 @@ export function AiResearchModal({
         <span>{triggerLabel ?? t.aiResearch}</span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ai-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
-        >
+      {open &&
+        mounted &&
+        createPortal(
           <div
-            className="card relative flex flex-col w-full max-w-2xl max-h-[90vh] overflow-hidden border border-accent/40 bg-bg shadow-2xl p-6 sm:p-7"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-modal-title"
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-[100] overflow-y-auto bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
           >
+          <div className="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+            <div
+              className="card relative my-auto flex flex-col w-full max-w-2xl max-h-[85vh] overflow-hidden border border-accent/40 bg-bg shadow-2xl rounded-2xl p-5 sm:p-7 text-left transform transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-line pb-4">
               <div className="space-y-1">
@@ -150,7 +164,7 @@ export function AiResearchModal({
                 type="button"
                 id="close-ai-modal-btn"
                 onClick={() => setOpen(false)}
-                className="btn !min-h-8 !w-8 !p-0 rounded-full text-muted hover:text-ink"
+                className="btn !min-h-8 !w-8 !p-0 rounded-full text-muted hover:text-ink hover:bg-surface text-base font-bold transition-colors"
                 aria-label="Close"
               >
                 ✕
@@ -308,7 +322,9 @@ export function AiResearchModal({
             )}
           </div>
         </div>
-      )}
-    </>
-  );
+      </div>,
+      document.body
+    )}
+  </>
+);
 }
