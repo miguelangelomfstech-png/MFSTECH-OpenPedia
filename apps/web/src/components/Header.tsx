@@ -34,6 +34,15 @@ export async function Header() {
         </Link>
         <div className="order-3 w-full md:order-none md:flex-1 md:px-6"><SearchBox placeholder={t("searchPlaceholder")} label={t("search")} /></div>
         <nav aria-label="Main" className="ml-auto flex items-center gap-2 text-sm">
+          <Link
+            id="header-start-writing-btn"
+            href="/wiki/new/edit"
+            className="btn btn-primary inline-flex items-center gap-1.5 font-semibold shadow-xs"
+            title={t("startWriting")}
+          >
+            <span aria-hidden="true" className="text-sm">✍️</span>
+            <span>{t("startWriting")}</span>
+          </Link>
           <AiResearchModal currentLocale={locale} />
           <Link className="btn hidden sm:inline-flex" href="/recent">{t("recent")}</Link>
           <Link className="btn hidden sm:inline-flex" href="/upload">{t("upload")}</Link>

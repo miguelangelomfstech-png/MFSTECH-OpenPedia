@@ -86,7 +86,7 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
       </p>
       {state?.error && <p role="alert" className="card border-red p-3 text-red">{state.error}</p>}
       <div className="flex gap-2">
-        <button className="btn btn-primary" disabled={pending}>{pending ? "Saving…" : "Save changes"}</button>
+        <button id="save-article-btn" className="btn btn-primary" disabled={pending}>{pending ? "Saving…" : "Save changes"}</button>
         <button type="button" className="btn" disabled={busy}
           onClick={() => start(async () => setPreview(await previewMarkdown(ta.current!.value)))}>
           {busy ? "Rendering…" : "Preview"}
