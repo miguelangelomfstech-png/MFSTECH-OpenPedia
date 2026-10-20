@@ -247,3 +247,29 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
 - **Passos**: Inspecionar a seção de links externos na janela modal de pesquisa IA.
 - **Resultado Esperado**: Apresenta links diretos para Perplexity AI e DuckDuckGo AI Chat com a pesquisa do utilizador codificada.
 - **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
+
+---
+
+### TS-12: Navegação Contínua e Integração IA no Editor
+
+#### TC-029: Botão "Começar a Escrever" no Menu Principal e Abas de Artigo
+- **Passos**:
+  1. Aceder à página inicial e verificar a presença do botão `#header-start-writing-btn` no menu principal.
+  2. Clicar no botão e criar um novo artigo.
+  3. Após publicação e redirecionamento para o artigo criado, verificar que o botão permanece visível no menu superior e que a aba do artigo possui a ação "Começar a escrever".
+  4. Clicar novamente no botão a partir da página do artigo e verificar que o formulário de criação é limpo e pronto para novo artigo.
+- **Resultado Esperado**: O utilizador consegue criar publicações consecutivas sem bloqueios.
+- **Status**: **PASSOU** (Automatizado via `09-start-writing.spec.ts`).
+
+#### TC-030: Preenchimento Automático do Campo Title ao Inserir Conteúdo da IA
+- **Passos**:
+  1. Aceder a `/wiki/new/edit` com o campo de título vazio.
+  2. Abrir o assistente de IA através do botão `✨ Pesquisa IA`.
+  3. Realizar uma pesquisa (ex.: "Qual a receita de fazer um bolo de chocolate").
+  4. Verificar o badge de título sugerido no resultado da pesquisa.
+  5. Clicar no botão "📥 Inserir no Artigo".
+  6. Verificar que a janela modal fecha, o campo Title (`#title`) é automaticamente preenchido com o título correspondente ao conteúdo pesquisado (ex.: "Bolo de Chocolate"), e a área de conteúdo (`#content`) recebe o texto da receita.
+  7. Gravar e publicar o artigo, confirmando a criação sob o título atribuído.
+- **Resultado Esperado**: O campo Title é automaticamente preenchido de forma coerente com o tema e conteúdo pesquisado pela IA.
+- **Status**: **PASSOU** (Automatizado via `10-ai-research-auto-title.spec.ts`).
+

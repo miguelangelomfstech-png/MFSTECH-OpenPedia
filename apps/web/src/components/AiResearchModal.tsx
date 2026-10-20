@@ -6,7 +6,7 @@ import { dict, type Locale } from "@/lib/i18n-config";
 
 type Props = {
   currentLocale?: Locale;
-  onInsert?: (text: string) => void;
+  onInsert?: (text: string, title?: string) => void;
   triggerClassName?: string;
   triggerLabel?: string;
 };
@@ -23,6 +23,7 @@ export function AiResearchModal({
   const [mode, setMode] = useState<"article" | "summary" | "bullet">("article");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [suggestedTitle, setSuggestedTitle] = useState("");
   const [perplexityUrl, setPerplexityUrl] = useState("");
   const [duckduckgoUrl, setDuckduckgoUrl] = useState("");
   const [copied, setCopied] = useState(false);
@@ -48,6 +49,7 @@ export function AiResearchModal({
     setLoading(true);
     setCopied(false);
     setResult("");
+    setSuggestedTitle("");
 
     try {
       const res = await fetch("/api/ai-research", {
@@ -59,6 +61,7 @@ export function AiResearchModal({
       if (!res.ok) throw new Error("Falha na requisição");
       const data = await res.json();
       setResult(data.text);
+      setSuggestedTitle(data.title || "");
       setPerplexityUrl(data.perplexityUrl);
       setDuckduckgoUrl(data.duckduckgoUrl);
     } catch {
@@ -97,11 +100,18 @@ export function AiResearchModal({
   }
 
   function handleInsert() {
+    const finalTitle = suggestedTitle || "";
     if (onInsert && result) {
-      onInsert(result);
+      onInsert(result, finalTitle);
       setOpen(false);
     } else {
-      // Find editor textarea if on edit page
+      // Find editor title input and content textarea if on edit page
+      const titleInput = document.getElementById("title") as HTMLInputElement | null;
+      if (titleInput && finalTitle && !titleInput.disabled && !titleInput.readOnly) {
+        titleInput.value = finalTitle;
+        titleInput.dispatchEvent(new Event("input", { bubbles: true }));
+        titleInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
       const ta = document.getElementById("content") as HTMLTextAreaElement | null;
       if (ta && result) {
         const { selectionStart: s, selectionEnd: e } = ta;
@@ -236,10 +246,18 @@ export function AiResearchModal({
             {/* Result Area */}
             {result && !loading && (
               <div className="mt-4 flex-1 flex flex-col min-h-0 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted uppercase tracking-wider">
-                    Resultado da Pesquisa
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-semibold text-muted uppercase tracking-wider">
+                      {t.aiResearch}
+                    </span>
+                    {suggestedTitle && (
+                      <span className="text-xs text-ink">
+                        <strong className="text-accent font-semibold">{t.aiSuggestedTitle}:</strong>{" "}
+                        <span id="ai-suggested-title" className="font-semibold">{suggestedTitle}</span>
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -253,7 +271,7 @@ export function AiResearchModal({
                       type="button"
                       id="ai-insert-btn"
                       onClick={handleInsert}
-                      className="btn btn-primary !min-h-8 !py-1 !px-3 text-xs"
+                      className="btn btn-primary !min-h-8 !py-1 !px-3 text-xs font-semibold shadow-xs"
                     >
                       📥 {t.aiInsertEditor}
                     </button>

@@ -351,12 +351,15 @@ Apresente os factos essenciais, contexto e detalhes explicados com títulos ## e
       generatedText = `Não foi possível obter uma resposta imediata para "${query}". Utilize os links abaixo do Perplexity ou DuckDuckGo AI para obter a resposta completa com um clique.`;
     }
 
+    const finalTitle = deriveArticleTitle(query, generatedText, language);
+
     const encodedQuery = encodeURIComponent(query);
     const perplexityUrl = `https://www.perplexity.ai/search?q=${encodedQuery}`;
     const duckduckgoUrl = `https://duckduckgo.com/?q=${encodedQuery}&ia=chat`;
 
     return NextResponse.json({
       text: generatedText.trim(),
+      title: finalTitle,
       query,
       perplexityUrl,
       duckduckgoUrl,
@@ -365,4 +368,154 @@ Apresente os factos essenciais, contexto e detalhes explicados com títulos ## e
     console.error("AI research API error:", e);
     return NextResponse.json({ error: "Falha ao processar a pesquisa." }, { status: 500 });
   }
+}
+
+function cleanTitleCapitalization(str: string): string {
+  if (!str) return "";
+  const lowercaseWords = new Set([
+    "de", "do", "da", "dos", "das", "e", "em", "para", "por", "com", "a", "o", "as", "os", "um", "uma",
+    "of", "the", "in", "on", "at", "to", "for", "and", "an",
+    "del", "y", "en", "di", "ed", "du", "des", "d'", "l'"
+  ]);
+
+  const words = str.trim().split(/\s+/);
+  return words
+    .map((word, index) => {
+      const lower = word.toLowerCase();
+      if (index > 0 && lowercaseWords.has(lower)) {
+        return lower;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
+function deriveArticleTitle(query: string, text?: string, lang = "pt"): string {
+  // 1. Try to extract first prominent heading from markdown text
+  if (text) {
+    const headings = text.match(/^\s*#+\s*([^\n\r]+)/gm);
+    if (headings) {
+      const genericHeadingPatterns = [
+        /^ingredientes?/i,
+        /^modo de preparo/i,
+        /^preparo/i,
+        /^passo a passo/i,
+        /^instruções/i,
+        /^instrucoes/i,
+        /^resumo/i,
+        /^introdução/i,
+        /^introducao/i,
+        /^visão geral/i,
+        /^visao geral/i,
+        /^contexto/i,
+        /^história e contexto/i,
+        /^notas/i,
+        /^referências/i,
+        /^referencias/i,
+        /^fontes/i,
+        /^conclusão/i,
+        /^conclusao/i,
+        /^dicas?/i,
+        /^ingredients?/i,
+        /^instructions?/i,
+        /^preparation/i,
+        /^method/i,
+        /^summary/i,
+        /^introduction/i,
+        /^overview/i,
+        /^preparación/i,
+        /^preparacion/i,
+        /^resumen/i,
+        /^introducción/i,
+        /^introduccion/i,
+        /^ingrédients/i,
+        /^préparation/i,
+        /^résumé/i,
+        /^preparazione/i,
+        /^riassunto/i,
+      ];
+
+      for (const rawHeading of headings) {
+        const cleanH = rawHeading
+          .replace(/^\s*#+\s*/, "")
+          .replace(/[*_`\[\]]/g, "")
+          .replace(/^[0-9.]+\s*/, "")
+          .trim();
+
+        const isGeneric = genericHeadingPatterns.some((pattern) => pattern.test(cleanH));
+        if (!isGeneric && cleanH.length >= 3 && cleanH.length <= 100) {
+          return cleanTitleCapitalization(cleanH);
+        }
+      }
+    }
+  }
+
+  // 2. Derive from query
+  let clean = query.trim().replace(/[?.,!;:]+$/g, "").trim();
+
+  const prefixes = [
+    // Portuguese
+    /^qual\s+a\s+receita\s+(de\s+(fazer\s+)?)?/i,
+    /^como\s+(fazer|preparar|cozinhar)\s+(um|uma)?\s*/i,
+    /^passo\s+a\s+passo\s+(de\s+(fazer\s+)?)?/i,
+    /^quem\s+(descobriu|achou)\s+(o|a|os|as)?\s*/i,
+    /^quem\s+(foi|é|era|são)\s+(o|a|os|as)?\s*/i,
+    /^o\s+que\s+(é|foi|são|era)\s+(o|a|os|as)?\s*/i,
+    /^como\s+(funciona|operam|age)\s+(o|a|os|as)?\s*/i,
+    /^me\s+fale\s+sobre\s+(o|a|os|as)?\s*/i,
+    /^fale\s+sobre\s+(o|a|os|as)?\s*/i,
+    /^conte\s+sobre\s+(o|a|os|as)?\s*/i,
+    // English
+    /^what\s+is\s+the\s+recipe\s+for\s+/i,
+    /^how\s+to\s+(make|bake|cook|prepare)\s+/i,
+    /^who\s+(discovered|found)\s*(the)?\s*/i,
+    /^who\s+(was|is|were|are)\s*(the|a)?\s*/i,
+    /^what\s+(is|was|are|were)\s*(the|a)?\s*/i,
+    /^tell\s+me\s+about\s+/i,
+    // Spanish
+    /^cu[aá]l\s+es\s+la\s+receta\s+(de\s+)?/i,
+    /^c[oó]mo\s+(hacer|preparar|cocinar)\s+(un|una)?\s*/i,
+    /^qui[eé]n\s+(descubri[oó]|encontr[oó])\s*(el|la)?\s*/i,
+    /^qui[eé]n\s+(fue|es|era)\s*(el|la)?\s*/i,
+    /^qu[eé]\s+(es|fue|son)\s*(el|la|los|las)?\s*/i,
+    // French
+    /^quelle\s+est\s+la\s+recette\s+(de\s+)?/i,
+    /^comment\s+(faire|préparer|cuisiner)\s+(un|une)?\s*/i,
+    /^qui\s+(a\s+découvert|a\s+trouvé)\s*(le|la|les|l')?\s*/i,
+    /^qui\s+(est|était)\s*(le|la|l')?\s*/i,
+    /^qu'est-ce\s+que\s*/i,
+    // Italian
+    /^qual\s+[eè]\s+la\s+ricetta\s+(per|di)\s+/i,
+    /^come\s+(fare|preparare|cucinare)\s+(un|una)?\s*/i,
+    /^chi\s+(ha\s+scoperto|ha\s+trovato)\s*(il|la|lo)?\s*/i,
+    /^chi\s+(era|[eè])\s*(il|la|lo)?\s*/i,
+    /^che\s+cos'[eè]\s*/i,
+    /^cos'[eè]\s*/i,
+  ];
+
+  for (const prefix of prefixes) {
+    if (prefix.test(clean)) {
+      clean = clean.replace(prefix, "").trim();
+      break;
+    }
+  }
+
+  // Handle discover queries
+  if (/^quem\s+(descobriu|achou)/i.test(query)) {
+    return cleanTitleCapitalization(lang === "pt" ? `Descobrimento do ${clean}` : clean);
+  }
+  if (/^who\s+(discovered|found)/i.test(query)) {
+    return cleanTitleCapitalization(lang === "en" ? `Discovery of ${clean}` : clean);
+  }
+  if (/^qui[eé]n\s+(descubri[oó]|encontr[oó])/i.test(query)) {
+    return cleanTitleCapitalization(lang === "es" ? `Descubrimiento de ${clean}` : clean);
+  }
+
+  // Handle recipe queries
+  if (isRecipeQuery(query)) {
+    const term = cleanRecipeSearchTerm(query);
+    if (term) clean = term;
+  }
+
+  return cleanTitleCapitalization(clean || query.trim());
 }

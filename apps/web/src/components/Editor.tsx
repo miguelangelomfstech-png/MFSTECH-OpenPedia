@@ -22,7 +22,9 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
   const [state, action, pending] = useActionState(saveArticle, undefined);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, start] = useTransition();
+  const [titleVal, setTitleVal] = useState(title === "sandbox" || title === "new" ? "" : title);
   const ta = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   function wrap(before: string, after: string) {
     const el = ta.current!;
@@ -39,11 +41,13 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
         <div>
           <label htmlFor="title" className="mb-1 block text-sm font-semibold">Title</label>
           <input
+            ref={titleInputRef}
             id="title"
             name="title"
             required
             maxLength={200}
-            defaultValue={title === "sandbox" ? "" : title}
+            value={titleVal}
+            onChange={(e) => setTitleVal(e.target.value)}
             placeholder="Título do artigo / Article title..."
             className="input"
           />
@@ -57,7 +61,13 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
           <AiResearchModal
             triggerClassName="btn !min-h-9 !px-3 border-accent/50 bg-accent/15 text-accent font-semibold hover:bg-accent hover:text-accent-ink"
             triggerLabel="✨ Pesquisa IA / AI Assistant"
-            onInsert={(txt) => {
+            onInsert={(txt, suggestedTitle) => {
+              if (suggestedTitle && !titleLocked) {
+                setTitleVal(suggestedTitle);
+                if (titleInputRef.current) {
+                  titleInputRef.current.value = suggestedTitle;
+                }
+              }
               const el = ta.current;
               if (el) {
                 const { selectionStart: s, selectionEnd: e } = el;

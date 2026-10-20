@@ -48,6 +48,7 @@ export const dict = {
     aiCopyBtn: "Copy Answer",
     aiCopied: "Copied!",
     aiInsertEditor: "Insert into Article",
+    aiSuggestedTitle: "Suggested title",
     aiFreeExternal: "Free External AI Links",
   },
   pt: {
@@ -99,6 +100,7 @@ export const dict = {
     aiCopyBtn: "Copiar Resposta",
     aiCopied: "Copiado!",
     aiInsertEditor: "Inserir no Artigo",
+    aiSuggestedTitle: "Título sugerido",
     aiFreeExternal: "Links de Pesquisa Gratuita Externa",
   },
   es: {
@@ -150,6 +152,7 @@ export const dict = {
     aiCopyBtn: "Copiar Respuesta",
     aiCopied: "¡Copiado!",
     aiInsertEditor: "Insertar en Artículo",
+    aiSuggestedTitle: "Título sugerido",
     aiFreeExternal: "Enlaces de Búsqueda Gratuita Externa",
   },
   fr: {
@@ -201,6 +204,7 @@ export const dict = {
     aiCopyBtn: "Copier la Réponse",
     aiCopied: "Copié !",
     aiInsertEditor: "Insérer dans l'Article",
+    aiSuggestedTitle: "Titre suggéré",
     aiFreeExternal: "Liens Externes de Recherche Gratuite",
   },
   it: {
@@ -252,6 +256,7 @@ export const dict = {
     aiCopyBtn: "Copia Risposta",
     aiCopied: "Copiato!",
     aiInsertEditor: "Inserisci nella Voce",
+    aiSuggestedTitle: "Titolo suggerito",
     aiFreeExternal: "Link Esterni di Ricerca Gratuita",
   },
 } as const;
