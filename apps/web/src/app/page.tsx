@@ -33,7 +33,7 @@ export default async function Home() {
         <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-6xl">{t("heroTitle")}</h1>
         <p className="mt-4 max-w-xl text-lg text-white/90">{t("heroSubtitle")}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/wiki/sandbox/edit" className="btn !border-white !bg-white !text-indigo-900">{t("startWriting")}</Link>
+          <Link href="/wiki/new/edit" className="btn !border-white !bg-white !text-indigo-900">{t("startWriting")}</Link>
           <Link href="/recent" className="btn !border-white/60 !bg-transparent !text-white">{t("recent")}</Link>
         </div>
       </section>

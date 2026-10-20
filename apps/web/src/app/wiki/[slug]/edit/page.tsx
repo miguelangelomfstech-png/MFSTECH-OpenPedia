@@ -32,15 +32,20 @@ export default async function EditPage({ params, searchParams }: Props) {
       </>
     );
   }
-  const title = data?.article.title ?? raw.replace(/[-_]/g, " ");
+  const isGenericNew = slug === "sandbox" || slug === "new" || slug === "create";
+  const title = isGenericNew ? "" : (data?.article.title ?? raw.replace(/[-_]/g, " "));
+  const titleLocked = !isGenericNew && !!data;
+
   return (
     <>
       <ArticleTabs slug={slug} active="edit" ns={ns} />
-      <h1 className="mb-6 font-serif text-3xl font-bold">{data ? `Editing ${title}` : `Creating ${title}`}</h1>
+      <h1 className="mb-6 font-serif text-3xl font-bold">
+        {data && !isGenericNew ? `Editing ${title}` : (title ? `Creating ${title}` : "Create a new article")}
+      </h1>
       {!actor.userId && (
         <p className="card mb-4 p-3 text-sm">You are not logged in. Your IP address hash will be recorded. <Link className="text-accent underline" href="/login">Log in</Link> to get credit.</p>
       )}
-      <Editor ns={ns} title={title} titleLocked={!!data} initial={data?.revision.content ?? ""} baseRevisionId={data?.revision.id ?? null} />
+      <Editor ns={ns} title={title} titleLocked={titleLocked} initial={isGenericNew ? "" : (data?.revision.content ?? "")} baseRevisionId={isGenericNew ? null : (data?.revision.id ?? null)} />
     </>
   );
 }

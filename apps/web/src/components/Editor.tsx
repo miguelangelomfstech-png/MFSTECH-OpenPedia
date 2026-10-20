@@ -37,7 +37,15 @@ export function Editor({ ns, title, titleLocked, initial, baseRevisionId }: Prop
       {titleLocked ? <input type="hidden" name="title" value={title} /> : (
         <div>
           <label htmlFor="title" className="mb-1 block text-sm font-semibold">Title</label>
-          <input id="title" name="title" required maxLength={200} defaultValue={title} className="input" />
+          <input
+            id="title"
+            name="title"
+            required
+            maxLength={200}
+            defaultValue={title === "sandbox" ? "" : title}
+            placeholder="Título do artigo / Article title..."
+            className="input"
+          />
         </div>
       )}
       <div role="toolbar" aria-label="Formatting" className="flex flex-wrap gap-1">
