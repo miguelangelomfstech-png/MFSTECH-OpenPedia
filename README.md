@@ -1,4 +1,4 @@
-# Openpedia
+# MFSTECH-OpenPedia
 
 > A modern, high-performance collaborative encyclopedia platform inspired by Wikipedia — built from scratch with Next.js 15, TypeScript, PostgreSQL, Drizzle ORM, Meilisearch, Redis, BullMQ, and an automated FFmpeg multi-resolution video transcoding pipeline.
 
