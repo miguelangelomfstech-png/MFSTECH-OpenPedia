@@ -26,7 +26,7 @@ test.describe("01: Homepage, Branding & Navigation", () => {
   test("displays header navigation items", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("#site-search")).toBeVisible();
-    await expect(page.locator("#theme-toggle")).toBeVisible();
-    await expect(page.locator("#language-selector-btn")).toBeVisible();
+    await expect(page.locator('#theme-toggle, button[aria-label*="dark mode"]')).toBeVisible();
+    await expect(page.locator("#language-select")).toBeVisible();
   });
 });

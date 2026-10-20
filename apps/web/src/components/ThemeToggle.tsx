@@ -12,7 +12,7 @@ export function ThemeToggle() {
     setTheme(next);
   }
   return (
-    <button type="button" onClick={toggle} className="btn" aria-pressed={theme === "dark"} aria-label="Toggle dark mode">
+    <button id="theme-toggle" type="button" onClick={toggle} className="btn" aria-pressed={theme === "dark"} aria-label="Toggle dark mode">
       <span aria-hidden>{theme === "dark" ? "☀" : "☾"}</span>
     </button>
   );
