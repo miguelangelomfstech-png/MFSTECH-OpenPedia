@@ -64,9 +64,24 @@ export function AiResearchModal({
     }
   }
 
-  function handleCopy() {
+  async function handleCopy() {
     if (!result) return;
-    navigator.clipboard.writeText(result);
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(result);
+      } else {
+        throw new Error("Clipboard API not available");
+      }
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = result;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }

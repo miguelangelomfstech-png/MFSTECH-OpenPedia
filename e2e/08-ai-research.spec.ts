@@ -20,7 +20,8 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     expect(data.duckduckgoUrl).toContain("duckduckgo.com");
   });
 
-  test("opens AI modal from header, generates answer and offers copy button", async ({ page }) => {
+  test("opens AI modal from header, generates answer and offers copy button", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/");
 
     // Open AI Research Modal
@@ -53,8 +54,8 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     await copyBtn.click();
     await expect(copyBtn).toContainText(/Copiado|Copied/i);
 
-    // Close modal
-    await page.locator("#close-ai-modal-btn").click();
+    // Close modal via Escape
+    await page.keyboard.press("Escape");
     await expect(modal).not.toBeVisible();
   });
 });
