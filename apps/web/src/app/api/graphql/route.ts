@@ -1,6 +1,7 @@
 import { createSchema, createYoga } from "graphql-yoga";
 import { db, articles, revisions, media, eq, and, desc, isNull, type SQL } from "@wiki/db";
-import { meili, INDEX_ARTICLES, publicUrl, slugify, rateLimit, LIMITS } from "@wiki/shared";
+import { publicUrl, slugify, rateLimit, LIMITS } from "@wiki/shared";
+import { searchArticles } from "@/lib/search";
 
 type Ctx = { ip: string };
 
@@ -34,7 +35,7 @@ const resolvers = {
       return db.select().from(media).where(and(...conds)).orderBy(desc(media.createdAt)).limit(clamp(limit, 100));
     },
     search: async (_: unknown, { q, limit }: { q: string; limit: number }) => {
-      const r = await meili().index(INDEX_ARTICLES).search(q, { limit: clamp(limit, 25), filter: 'namespace = "main"' });
+      const r = await searchArticles(q, { limit: clamp(limit, 25), namespace: "main" });
       return r.hits;
     },
   },
