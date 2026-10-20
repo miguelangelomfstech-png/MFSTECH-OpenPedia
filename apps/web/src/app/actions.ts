@@ -127,6 +127,9 @@ const registerSchema = z.object({
     .regex(/^[\p{L}\p{N} _.-]+$/u, "Use letters, numbers, spaces, _ . -"),
   email: z.string().trim().toLowerCase().email("Invalid email address"),
   password: z.string().min(10, "Password must be at least 10 characters").max(200),
+  gdprConsent: z.literal("on", {
+    errorMap: () => ({ message: "Must accept Privacy Policy (GDPR) to create account." }),
+  }),
 });
 
 export async function register(_prev: FormState, fd: FormData): Promise<FormState> {

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import { Header } from "@/components/Header";
+import { GdprConsent } from "@/components/GdprConsent";
 import { themeScript } from "@/lib/theme";
 import { getLocale, getT } from "@/lib/i18n";
 
@@ -24,14 +26,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={`${inter.variable} ${serif.variable}`} suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased flex flex-col justify-between">
         <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-accent focus:p-3 focus:text-accent-ink">{t("skip")}</a>
-        <Header />
-        <main id="content" className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <div>
+          <Header />
+          <main id="content" className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        </div>
         <footer className="mt-16 border-t border-line py-8 text-center text-sm text-muted">
           <p>{siteName} — content is available under <a className="underline" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> unless noted.</p>
-          <p className="mt-1"><a className="underline" href="/api/graphql">GraphQL</a> · <a className="underline" href="/api/v1/articles">REST API</a> · <a className="underline" href="/sitemap.xml">Sitemap</a></p>
+          <p className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link className="underline hover:text-ink" href="/privacy">{t("privacy")}</Link>
+            <span>·</span>
+            <Link className="underline hover:text-ink" href="/api/graphql">GraphQL</Link>
+            <span>·</span>
+            <Link className="underline hover:text-ink" href="/api/v1/articles">REST API</Link>
+            <span>·</span>
+            <Link className="underline hover:text-ink" href="/sitemap.xml">Sitemap</Link>
+          </p>
         </footer>
+        <GdprConsent currentLocale={locale} />
       </body>
     </html>
   );

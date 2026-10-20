@@ -6,10 +6,17 @@ import type { FormState } from "@/app/actions";
 type Field = { name: string; label: string; type?: string; autoComplete?: string; hint?: string };
 
 export function AuthForm({
-  action, fields, submit, hidden,
+  action,
+  fields,
+  submit,
+  hidden,
+  checkbox,
 }: {
   action: (s: FormState, fd: FormData) => Promise<FormState>;
-  fields: Field[]; submit: string; hidden?: Record<string, string>;
+  fields: Field[];
+  submit: string;
+  hidden?: Record<string, string>;
+  checkbox?: { name: string; label: React.ReactNode; required?: boolean };
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   return (
@@ -18,11 +25,32 @@ export function AuthForm({
       {fields.map((f) => (
         <div key={f.name}>
           <label htmlFor={f.name} className="mb-1 block text-sm font-semibold">{f.label}</label>
-          <input id={f.name} name={f.name} type={f.type ?? "text"} autoComplete={f.autoComplete} required className="input"
-            aria-describedby={f.hint ? `${f.name}-hint` : undefined} />
+          <input
+            id={f.name}
+            name={f.name}
+            type={f.type ?? "text"}
+            autoComplete={f.autoComplete}
+            required
+            className="input"
+            aria-describedby={f.hint ? `${f.name}-hint` : undefined}
+          />
           {f.hint && <p id={`${f.name}-hint`} className="mt-1 text-xs text-muted">{f.hint}</p>}
         </div>
       ))}
+      {checkbox && (
+        <div className="flex items-start gap-2 pt-1">
+          <input
+            id={checkbox.name}
+            name={checkbox.name}
+            type="checkbox"
+            required={checkbox.required ?? true}
+            className="mt-1 h-4 w-4 rounded border-line text-accent focus:ring-accent cursor-pointer"
+          />
+          <label htmlFor={checkbox.name} className="text-xs text-muted leading-relaxed cursor-pointer select-none">
+            {checkbox.label}
+          </label>
+        </div>
+      )}
       {state?.error && <p role="alert" className="text-red">{state.error}</p>}
       <button className="btn btn-primary w-full justify-center" disabled={pending}>{pending ? "Please wait…" : submit}</button>
     </form>
