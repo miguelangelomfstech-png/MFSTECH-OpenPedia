@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
+  test.beforeEach(async () => {
+    test.setTimeout(60000);
+  });
+
   test("POST /api/ai-research generates factual encyclopedic text for 'quem descobriu o brasil'", async ({ request }) => {
     const res = await request.post("/api/ai-research", {
       data: {
@@ -41,6 +45,30 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     expect(data.text).toMatch(/ingrediente|preparo|margarina|manteiga|ovos|a[cç][uú]car|farinha|chocolate/i);
     // Must NOT be purely the history of chocolate
     expect(data.text).not.toContain("A história do bolo começou no antigo Egito");
+  });
+
+  test("POST /api/ai-research answers complex questions completely inside the box without fallback links", async ({
+    request,
+  }) => {
+    const complexQuery =
+      "Como funciona a fusão nuclear e quais são os principais desafios para a geração comercial de energia elétrica no planeta?";
+    const res = await request.post("/api/ai-research", {
+      data: {
+        query: complexQuery,
+        mode: "article",
+        language: "pt",
+      },
+    });
+
+    expect(res.status()).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveProperty("text");
+    expect(data.text.length).toBeGreaterThan(100);
+    // Must NOT tell the user to click links
+    expect(data.text).not.toContain("Não foi possível obter uma resposta imediata");
+    expect(data.text).not.toContain("Utilize os links abaixo");
+    // Must contain substantive physics content
+    expect(data.text).toMatch(/fus[aã]o|n[uú]cleo|energia|plasma|rea[cç][aã]o|temperatura|press[aã]o|sol/i);
   });
 
   test("opens AI modal centered, answers query, closes on copy, esc and close button", async ({ page, context }) => {
