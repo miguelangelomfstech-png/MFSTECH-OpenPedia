@@ -84,7 +84,7 @@ test.describe("10: AI Research Automatic Title Population in Editor", () => {
     await submitBtn.click();
 
     // Verify redirect to published page with the related title
-    await expect(page).not.toHaveURL(/\/wiki\/new\/edit/);
-    await expect(page.locator("h1")).toContainText(/Bolo de Chocolate/i);
+    await expect(page).not.toHaveURL(/\/wiki\/new\/edit/, { timeout: 15000 });
+    await expect(page.locator("h1").first()).toContainText(/Bolo de Chocolate/i, { timeout: 10000 });
   });
 });

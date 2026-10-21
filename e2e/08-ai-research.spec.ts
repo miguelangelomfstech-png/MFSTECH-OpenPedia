@@ -71,6 +71,33 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     expect(data.text).toMatch(/fus[aã]o|n[uú]cleo|energia|plasma|rea[cç][aã]o|temperatura|press[aã]o|sol/i);
   });
 
+  test("POST /api/ai-research answers 'sobre o linux, me informe o melhor, como performance economia de espacos e etc' with complete distro info", async ({
+    request,
+  }) => {
+    const linuxQuery = "sobre o linux, me informe o melhor, como performance economia de espacos e etc";
+    const res = await request.post("/api/ai-research", {
+      data: {
+        query: linuxQuery,
+        mode: "article",
+        language: "pt",
+      },
+    });
+
+    expect(res.status()).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveProperty("text");
+    expect(data.text.length).toBeGreaterThan(150);
+    // Must NOT contain any error message
+    expect(data.text).not.toContain("Ocorreu um erro ao consultar a IA gratuita");
+    expect(data.text).not.toContain("Não foi possível obter uma resposta imediata");
+    // Must mention lightweight/high-performance distributions
+    expect(data.text).toMatch(/Alpine|Puppy|Lubuntu|Xubuntu|antiX|Arch|Debian/i);
+    // Must mention RAM / memory and space / disk economy
+    expect(data.text).toMatch(/RAM|mem[oó]ria|espa[çc]o|disco/i);
+    // Suggested title must be meaningful
+    expect(data.title).toMatch(/Linux|Distribuiç[õo]es/i);
+  });
+
   test("opens AI modal centered, answers query, closes on copy, esc and close button", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/");

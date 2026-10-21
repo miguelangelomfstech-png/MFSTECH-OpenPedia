@@ -158,14 +158,18 @@ Variáveis de ambiente requeridas no Vercel:
 O MFSTECH-OpenPedia conta com um assistente de pesquisa inteligente e factual com interface modal centrada e atalhos globais no cabeçalho e na barra de ferramentas do editor:
 
 - **Motor Generativo Primário (Google Gemini)**: Processamento de perguntas complexas, científicas, históricas e técnicas em segundos, gerando artigos enciclopédicos estruturados em Markdown com seções lógicas, conceitos aprofundados e conclusões.
-- **Detetor Especializado de Receitas**: Consultas gastronómicas e culinárias são identificadas e respondidas diretamente com listas precisas de ingredientes e modo de preparo passo a passo, sem introduções históricas supérfluas.
+- **Resolvedores Especializados de Domínio de Alta Performance**:
+  - **Linux e Otimização de Recursos**: Resposta instantânea e completa para selecção de distribuições Linux por desempenho, consumo de RAM em idle e economia de disco (Alpine, Puppy Linux, Lubuntu, Xubuntu, antiX, Arch Linux, Debian Minimal) com tabelas comparativas detalhadas e recomendações práticas.
+  - **Ciência Avançada e Física Nuclear**: Análise detalhada sobre fusão nuclear vs. fissão, confinamento magnético (Tokamak e Stellarator / ITER) e desafios tecnológicos de geração limpa.
+  - **Detetor Especializado de Receitas**: Consultas gastronómicas e culinárias são identificadas e respondidas diretamente com listas precisas de ingredientes e modo de preparo passo a passo, sem introduções históricas supérfluas.
 - **Extração Automática de Títulos**: O sistema deduz inteligentemente o título mais adequado para o tema pesquisado (corrigindo erros de digitação e removendo termos interrogativos) e preenche automaticamente o campo `(Title)` ao clicar em "Inserir no Artigo".
 - **Cascata Multi-Camadas (High-Resilience Fallback)**:
-  1. Google Gemini Flash (Alta velocidade e profundidade conceitual);
-  2. Wikilivros / Wikibooks Culinária;
-  3. Pollinations AI;
-  4. Wikipedia Factual Multi-Parágrafos;
-  5. DuckDuckGo Instant Answers;
-  6. Síntese Temática Conceitual Estruturada.
+  1. Resolvedores Rápidos de Domínio (Linux, Física Nuclear, Receitas);
+  2. Google Gemini Flash (quando configurada chave em ambiente);
+  3. Wikilivros / Wikibooks Culinária;
+  4. Pollinations AI;
+  5. Wikipedia Factual com extração de palavras-chave limpas;
+  6. DuckDuckGo Instant Answers;
+  7. Síntese Temática Conceitual Estruturada com garantia de resposta HTTP 200 (sempre traz o conteúdo na caixa sem erros).
 - **Navegação Sem Interrupções**: Resposta 100% contida dentro da caixa de resposta, garantindo cópia imediata (`Ctrl+C` / botão de cópia com auto-fecho) ou inserção direta no editor com preenchimento simultâneo de título e corpo.
 

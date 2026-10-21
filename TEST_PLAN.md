@@ -273,3 +273,14 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
 - **Resultado Esperado**: O campo Title é automaticamente preenchido de forma coerente com o tema e conteúdo pesquisado pela IA.
 - **Status**: **PASSOU** (Automatizado via `10-ai-research-auto-title.spec.ts`).
 
+#### TC-031: Resolução Especializada para Perguntas Técnicas e Linux (Performance e Economia de Espaço)
+- **Passos**:
+  1. Enviar requisição POST para `/api/ai-research` com a pergunta: `"sobre o linux, me informe o melhor, como performance economia de espacos e etc"`.
+  2. Verificar o status da resposta e o corpo de texto retornado.
+- **Resultado Esperado**:
+  - Retorna HTTP 200 sem exibir mensagem de erro nem links evasivos.
+  - Traz informação aprofundada cobrindo distribuições para economia extrema (Alpine Linux, Puppy Linux), performance diária (Lubuntu, Xubuntu, antiX) e controle técnico (Debian Minimal, Arch Linux).
+  - Inclui tabela comparativa de consumo de RAM em idle, espaço mínimo em disco e perfis recomendados.
+  - Sugere título coerente `"Guia Completo das Melhores Distribuições Linux: Performance e Economia de Recursos"`.
+- **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
+
