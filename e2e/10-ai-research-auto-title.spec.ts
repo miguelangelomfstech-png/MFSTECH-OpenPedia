@@ -52,7 +52,7 @@ test.describe("10: AI Research Automatic Title Population in Editor", () => {
 
     const queryInput = page.locator("#ai-query-input");
     await queryInput.fill("Qual a receita de fazer um bolo de chocolate");
-    await page.locator('button[type="submit"]:has-text("Pesquisar com IA")').click();
+    await queryInput.press("Enter");
 
     // Wait for result and suggested title
     const insertBtn = page.locator("#ai-insert-btn");

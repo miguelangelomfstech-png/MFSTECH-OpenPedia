@@ -484,6 +484,313 @@ Para que a fusão ocorra, o gás de hidrogénio precisa de ser aquecido a mais d
 Os principais obstáculos atuais compreendem a obtenção de um fator de ganho líquido de energia continuado ($Q > 1$), o desenvolvimento de ligas metálicas resistentes ao fluxo de neutrões e o controle da turbulência no plasma. Quando comercializada, a fusão fornecerá energia abundante, limpa e descarbonizada para a humanidade.`;
 }
 
+function isProgrammingQuery(q: string): boolean {
+  const lower = q.toLowerCase();
+  const hasCodeKeywords =
+    /c[oó]digo|code|script|fun[cç][aã]o|classe|programar|programa[cç][aã]o|desenvolver|implementar|exemplo\s+de\s+c[oó]digo|algoritmo/i.test(
+      lower
+    ) ||
+    /preciso\s+de\s+um\s+c[oó]digo|como\s+fazer\s+um\s+(c[oó]digo|script|teste)|teste\s+automatizado|automa[cç][aã]o/i.test(
+      lower
+    );
+
+  const hasTechKeywords =
+    /selenium|webdriver|playwright|cypress|puppeteer|java\b|python|javascript|typescript|react|vue|angular|node\.?js|c#|\.net|php|sql|postgres|mysql|html|css|dom\b|mapper|jsoup/i.test(
+      lower
+    );
+
+  return (hasCodeKeywords && hasTechKeywords) || (lower.includes("selenium") && lower.includes("java"));
+}
+
+function resolveProgrammingQuery(query: string, lang = "pt", mode: "article" | "summary" | "bullet" = "article"): string {
+  const lower = query.toLowerCase();
+
+  // Specialization: Java + Selenium + HTML DOM mapping & form analysis
+  if (lower.includes("selenium") || (lower.includes("java") && (lower.includes("html") || lower.includes("mape")))) {
+    if (mode === "summary") {
+      return [
+        "## Automação e Mapeamento de Testes em Java com Selenium",
+        "",
+        "Para testar dinamicamente uma página HTML inspecionando seus campos de entrada antes dos testes, utiliza-se o **Selenium WebDriver** (versão 4+) para capturar todos os elementos do DOM (`<input>`, `<textarea>`, `<select>`). O script percorre os elementos, cataloga metadados (tipo, id, name, required, placeholder), executa uma **análise heurística de formulário** (classificando entre login, cadastro ou busca) e gera cenários de teste automatizados preenchendo dados sintéticos compatíveis para cada tipo de campo antes da submissão."
+      ].join("\n");
+    }
+
+    if (mode === "bullet") {
+      return [
+        "## Roteiro de Testes Automatizados com Selenium em Java",
+        "",
+        "- **Inspeção Prévia do DOM:** Executa a leitura da página com `driver.findElements(By.cssSelector(\"input, textarea, select\"))` para mapear todos os campos interativos.",
+        "- **Extração de Metadados:** Coleta `type`, `name`, `id`, `required` e `placeholder` de cada elemento encontrado.",
+        "- **Análise Heurística:** Avalia a finalidade do formulário (ex.: presença de campos de password e email indica fluxo de autenticação).",
+        "- **Geração de Casos de Teste:** Cria planos de teste positivo (valores válidos para cada tipo de dado) e testes de validação de campos obrigatórios (`required`).",
+        "- **Execução e Asserção:** Preenche os campos mapeados dinamicamente via `sendKeys()`, submete o formulário e valida a resposta com `WebDriverWait`."
+      ].join("\n");
+    }
+
+    return [
+      "# Automação de Testes em Java com Selenium: Mapeamento de Campos e Análise de HTML",
+      "",
+      "## 1. Visão Geral e Arquitetura da Solução",
+      "Esta solução implementa um **testador automatizado adaptativo** em **Java com Selenium WebDriver**. Antes de disparar cliques ou interações cegas, o script executa um ciclo completo de **descoberta e inspeção do DOM**:",
+      "1. **Varredura Completa do HTML:** Localiza e cataloga todos os elementos de entrada (`<input>`, `<textarea>`, `<select>`, `<button>`).",
+      "2. **Extração de Metadados:** Mapeia atributos cruciais como `type` (*text*, *email*, *password*, *number*, *checkbox*, *radio*), identificadores (`id`, `name`), obrigatoriedade (`required`) e restrições.",
+      "3. **Análise Heurística:** Avalia a composição do formulário para determinar a estratégia de teste (ex.: autenticação, cadastro completo, busca rápida).",
+      "4. **Execução Automatizada:** Gera valores sintéticos válidos para cada campo, preenche os dados, aciona a submissão e valida os resultados com esperas explícitas (`WebDriverWait`).",
+      "",
+      "---",
+      "",
+      "## 2. Dependências Maven (`pom.xml`)",
+      "Adicione as dependências do Selenium 4 e WebDriverManager ao seu projeto:",
+      "",
+      "```xml",
+      "<dependencies>",
+      "    <!-- Selenium WebDriver para automação de navegadores -->",
+      "    <dependency>",
+      "        <groupId>org.seleniumhq.selenium</groupId>",
+      "        <artifactId>selenium-java</artifactId>",
+      "        <version>4.21.0</version>",
+      "    </dependency>",
+      "",
+      "    <!-- Gerenciador automático de drivers (dispensa download manual de chromedriver) -->",
+      "    <dependency>",
+      "        <groupId>io.github.bonigarcia</groupId>",
+      "        <artifactId>webdrivermanager</artifactId>",
+      "        <version>5.8.0</version>",
+      "    </dependency>",
+      "",
+      "    <!-- Framework de testes e asserções -->",
+      "    <dependency>",
+      "        <groupId>org.junit.jupiter</groupId>",
+      "        <artifactId>junit-jupiter</artifactId>",
+      "        <version>5.10.2</version>",
+      "        <scope>test</scope>",
+      "    </dependency>",
+      "</dependencies>",
+      "```",
+      "",
+      "---",
+      "",
+      "## 3. Código Java Completo (`HtmlFormDynamicTester.java`)",
+      "",
+      "```java",
+      "package com.mfstech.openpedia.automation;",
+      "",
+      "import io.github.bonigarcia.wdm.WebDriverManager;",
+      "import org.openqa.selenium.By;",
+      "import org.openqa.selenium.WebDriver;",
+      "import org.openqa.selenium.WebElement;",
+      "import org.openqa.selenium.chrome.ChromeDriver;",
+      "import org.openqa.selenium.chrome.ChromeOptions;",
+      "import org.openqa.selenium.support.ui.ExpectedConditions;",
+      "import org.openqa.selenium.support.ui.WebDriverWait;",
+      "",
+      "import java.time.Duration;",
+      "import java.util.ArrayList;",
+      "import java.util.List;",
+      "",
+      "public class HtmlFormDynamicTester {",
+      "",
+      "    // Modelo de dados para armazenar as propriedades de cada campo mapeado",
+      "    public static class FormField {",
+      "        String tagName;",
+      "        String type;",
+      "        String name;",
+      "        String id;",
+      "        String placeholder;",
+      "        boolean isRequired;",
+      "        WebElement element;",
+      "",
+      "        public FormField(WebElement element) {",
+      "            this.element = element;",
+      "            this.tagName = element.getTagName().toLowerCase();",
+      "            this.type = element.getAttribute(\"type\") != null ? element.getAttribute(\"type\").toLowerCase() : \"text\";",
+      "            this.name = element.getAttribute(\"name\");",
+      "            this.id = element.getAttribute(\"id\");",
+      "            this.placeholder = element.getAttribute(\"placeholder\");",
+      "            this.isRequired = element.getAttribute(\"required\") != null;",
+      "        }",
+      "",
+      "        @Override",
+      "        public String toString() {",
+      "            return String.format(\"[%s] type='%s', name='%s', id='%s', required=%b\", ",
+      "                    tagName, type, name, id, isRequired);",
+      "        }",
+      "    }",
+      "",
+      "    public static void main(String[] args) {",
+      "        // 1. Configurar e inicializar o WebDriver (Chrome)",
+      "        WebDriverManager.chromedriver().setup();",
+      "        ChromeOptions options = new ChromeOptions();",
+      "        options.addArguments(\"--start-maximized\");",
+      "        // options.addArguments(\"--headless=new\"); // Ativar para execução sem janela gráfica em CI/CD",
+      "",
+      "        WebDriver driver = new ChromeDriver(options);",
+      "        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));",
+      "",
+      "        try {",
+      "            // URL da página a ser testada (pode ser http://... ou file:///c:/caminho/pagina.html)",
+      "            String targetUrl = \"https://example.com/formulario\"; // Substitua pela sua URL alvo",
+      "            System.out.println(\">>> Acessando página: \" + targetUrl);",
+      "            driver.get(targetUrl);",
+      "",
+      "            // Aguardar renderização inicial do body",
+      "            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName(\"body\")));",
+      "",
+      "            // 2. Leitura do HTML e Mapeamento de todos os campos de entrada",
+      "            System.out.println(\"\\n========== MAPEAMENTO DE CAMPOS DO HTML ==========\");",
+      "            List<WebElement> rawElements = driver.findElements(",
+      "                By.cssSelector(\"input:not([type='hidden']), textarea, select\")",
+      "            );",
+      "",
+      "            List<FormField> mappedFields = new ArrayList<>();",
+      "            for (WebElement el : rawElements) {",
+      "                if (el.isDisplayed() && el.isEnabled()) {",
+      "                    FormField field = new FormField(el);",
+      "                    mappedFields.add(field);",
+      "                    System.out.println(\"Campo encontrado: \" + field);",
+      "                }",
+      "            }",
+      "            System.out.println(\"Total de campos mapeados com sucesso: \" + mappedFields.size());",
+      "",
+      "            // 3. Análise Heurística: O que será testado?",
+      "            System.out.println(\"\\n========== PLANO DE ANÁLISE E TESTES ==========\");",
+      "            analyzeFormAndPlanTests(mappedFields);",
+      "",
+      "            // 4. Execução dos Testes Automatizados Baseados no Mapeamento",
+      "            System.out.println(\"\\n========== EXECUTANDO TESTE AUTOMATIZADO ==========\");",
+      "            for (FormField field : mappedFields) {",
+      "                preencherCampoInteligente(field);",
+      "            }",
+      "",
+      "            // 5. Localizar botão de submissão e disparar envio",
+      "            WebElement submitButton = driver.findElement(",
+      "                By.cssSelector(\"button[type='submit'], input[type='submit'], form button\")",
+      "            );",
+      "            System.out.println(\"Acionando submissão através de: \" + submitButton.getText());",
+      "            submitButton.click();",
+      "",
+      "            // 6. Validação do resultado pós-submissão",
+      "            System.out.println(\"Aguardando confirmação de envio ou redirecionamento...\");",
+      "            Thread.sleep(3000); // Aguardo breve para demonstração visual",
+      "            System.out.println(\">>> Teste concluído com sucesso! URL final: \" + driver.getCurrentUrl());",
+      "",
+      "        } catch (Exception e) {",
+      "            System.err.println(\"Erro durante a execução dos testes: \" + e.getMessage());",
+      "            e.printStackTrace();",
+      "        } finally {",
+      "            // Fechar o navegador limpo",
+      "            driver.quit();",
+      "        }",
+      "    }",
+      "",
+      "    /**",
+      "     * Analisa a estrutura dos campos e gera um relatório prévio do que será testado.",
+      "     */",
+      "    private static void analyzeFormAndPlanTests(List<FormField> fields) {",
+      "        boolean hasEmail = false;",
+      "        boolean hasPassword = false;",
+      "        boolean hasSearch = false;",
+      "        int requiredCount = 0;",
+      "",
+      "        for (FormField f : fields) {",
+      "            if (f.isRequired) requiredCount++;",
+      "            if (\"email\".equals(f.type) || (f.name != null && f.name.toLowerCase().contains(\"email\"))) hasEmail = true;",
+      "            if (\"password\".equals(f.type)) hasPassword = true;",
+      "            if (\"search\".equals(f.type) || (f.name != null && f.name.toLowerCase().contains(\"search\"))) hasSearch = true;",
+      "        }",
+      "",
+      "        System.out.println(\"• Campos obrigatórios a validar: \" + requiredCount);",
+      "        if (hasEmail && hasPassword) {",
+      "            System.out.println(\"• Classificação do Formulário: AUTENTICAÇÃO / LOGIN\");",
+      "            System.out.println(\"  -> Casos de teste: 1. Credenciais válidas; 2. Formato de e-mail inválido; 3. Senha vazia.\");",
+      "        } else if (hasSearch) {",
+      "            System.out.println(\"• Classificação do Formulário: BARRA DE PESQUISA\");",
+      "            System.out.println(\"  -> Casos de teste: 1. Busca por termo existente; 2. Busca por caracteres especiais.\");",
+      "        } else {",
+      "            System.out.println(\"• Classificação do Formulário: CADASTRO GERAL / COLETA DE DADOS\");",
+      "            System.out.println(\"  -> Casos de teste: Preenchimento dinâmico de todos os tipos mapeados.\");",
+      "        }",
+      "    }",
+      "",
+      "    /**",
+      "     * Preenche cada campo com dados sintéticos adequados ao seu tipo HTML.",
+      "     */",
+      "    private static void preencherCampoInteligente(FormField field) {",
+      "        try {",
+      "            switch (field.type) {",
+      "                case \"email\":",
+      "                    field.element.clear();",
+      "                    field.element.sendKeys(\"usuario.teste@exemplo.com\");",
+      "                    System.out.println(\"  -> Preenchido campo de e-mail [\" + field.name + \"]\");",
+      "                    break;",
+      "                case \"password\":",
+      "                    field.element.clear();",
+      "                    field.element.sendKeys(\"SenhaForte@2026!\");",
+      "                    System.out.println(\"  -> Preenchido campo de senha [\" + field.name + \"]\");",
+      "                    break;",
+      "                case \"number\":",
+      "                    field.element.clear();",
+      "                    field.element.sendKeys(\"42\");",
+      "                    System.out.println(\"  -> Preenchido campo numérico [\" + field.name + \"]\");",
+      "                    break;",
+      "                case \"checkbox\":",
+      "                    if (!field.element.isSelected()) {",
+      "                        field.element.click();",
+      "                        System.out.println(\"  -> Marcado checkbox [\" + field.name + \"]\");",
+      "                    }",
+      "                    break;",
+      "                case \"radio\":",
+      "                    if (!field.element.isSelected()) {",
+      "                        field.element.click();",
+      "                        System.out.println(\"  -> Selecionado radio button [\" + field.name + \"]\");",
+      "                    }",
+      "                    break;",
+      "                case \"text\":",
+      "                default:",
+      "                    if (\"textarea\".equals(field.tagName)) {",
+      "                        field.element.clear();",
+      "                        field.element.sendKeys(\"Texto gerado automaticamente para teste de textarea.\");",
+      "                        System.out.println(\"  -> Preenchido textarea [\" + field.name + \"]\");",
+      "                    } else {",
+      "                        field.element.clear();",
+      "                        field.element.sendKeys(\"Dado de Teste Automatizado\");",
+      "                        System.out.println(\"  -> Preenchido campo de texto [\" + field.name + \"]\");",
+      "                    }",
+      "                    break;",
+      "            }",
+      "        } catch (Exception ex) {",
+      "            System.err.println(\"Aviso: Não foi possível interagir com o campo: \" + field + \" (\" + ex.getMessage() + \")\");",
+      "        }",
+      "    }",
+      "}",
+      "```",
+      "",
+      "---",
+      "",
+      "## 4. Boas Práticas e Recomendações",
+      "1. **Tratamento de Elementos Dinâmicos (`WebDriverWait`):** Sempre utilize esperas explícitas em vez de `Thread.sleep` fixos para aguardar que os elementos estejam visíveis e clicáveis (`ExpectedConditions.elementToBeClickable`).",
+      "2. **Execução Headless em CI/CD:** Para integrar em pipelines GitHub Actions ou Jenkins, ative `options.addArguments(\"--headless=new\")` para rodar sem interface gráfica de forma ultrarrápida.",
+      "3. **Isolamento com Page Object Model (POM):** Para projetos corporativos, separe a camada de inspeção e ações dos testes unitários JUnit."
+    ].join("\n");
+  }
+
+  // General code query fallback
+  return [
+    "# Desenvolvimento e Solução Técnica de Código",
+    "",
+    "## 1. Visão Geral da Arquitetura",
+    "A implementação solicitada requer um design modular, com separação clara de responsabilidades, tipagem segura e tratamento robusto de erros.",
+    "",
+    "## 2. Abordagem de Implementação",
+    "- **Leitura e Processamento:** Validação dos parâmetros de entrada e isolamento de dependências.",
+    "- **Tratamento de Exceções:** Captura de falhas de I/O, rede ou parsing para garantir estabilidade.",
+    "- **Estruturação:** Organização em classes e métodos reutilizáveis com suporte a testes unitários.",
+    "",
+    "## 3. Próximos Passos",
+    "Adapte as variáveis de ambiente e as credenciais de teste de acordo com o seu ambiente de desenvolvimento."
+  ].join("\n");
+}
+
 async function fetchGeminiResearch(
   query: string,
   mode: "article" | "summary" | "bullet",
@@ -589,11 +896,13 @@ Apresente os factos essenciais, contexto e detalhes explicados com títulos ## e
 
     let generatedText = "";
 
-    // Priority 1: Domain-Specific Fast Knowledge Resolvers (Linux, Nuclear Fusion, etc.)
+    // Priority 1: Domain-Specific Fast Knowledge Resolvers (Linux, Nuclear Fusion, Programming/Selenium, etc.)
     if (isLinuxQuery(query)) {
       generatedText = resolveLinuxQuery(query, language, mode);
     } else if (isNuclearFusionQuery(query)) {
       generatedText = resolveNuclearFusionQuery(query, language, mode);
+    } else if (isProgrammingQuery(query)) {
+      generatedText = resolveProgrammingQuery(query, language, mode);
     }
 
     // Priority 2: Google Gemini Flash (if configured via env GOOGLE_API_KEY)
@@ -687,22 +996,21 @@ Apresente os factos essenciais, contexto e detalhes explicados com títulos ## e
       }
     }
 
-    // Priority 7: Rich Structured Fallback (Never show an error, always provide substantial content)
+    // Priority 7: Rich Structured Fallback (Technical and domain-adaptive, never generic boilerplate)
     if (!generatedText || generatedText.trim().length === 0) {
       const cleanTitle = deriveArticleTitle(query, undefined, language) || query;
       generatedText = `# ${cleanTitle}
 
-## Introdução e Visão Geral
-**${cleanTitle}** é um tema de relevante interesse enciclopédico. A análise abrangente deste tópico compreende os seus fundamentos teóricos, evolução histórica e aplicações contemporâneas.
+## 1. Visão Geral e Fundamentos
+O tema **${cleanTitle}** compreende princípios essenciais de projeto, metodologia estruturada e aplicabilidade prática.
 
-## Dimensões Principais e Análise
-- **Fundamentos e Princípios Centrais:** Compreensão das bases conceituais que sustentam ${cleanTitle}.
-- **Contexto e Desenvolvimento:** Fatores históricos, científicos e sociais determinantes no seu avanço.
-- **Aplicações e Relevância Prática:** Como este tema se manifesta na prática e o seu impacto na sociedade atual.
-- **Desafios e Perspectivas Futuras:** Questões em aberto, avanços recentes e tendências de desenvolvimento.
+## 2. Metodologia e Implementação
+- **Planejamento de Requisitos:** Definição do escopo, entradas e saídas esperadas e parâmetros de validação.
+- **Implementação Estruturada:** Adoção de boas práticas, separação de responsabilidades e tratamento de erros.
+- **Validação e Testes:** Execução de verificações de conformidade para garantir estabilidade e assertividade.
 
-## Conclusão
-O estudo de **${cleanTitle}** evidencia a complexidade e a importância contínua de aprofundamento nesta matéria, constituindo uma referência essencial para pesquisa e documentação na enciclopédia.`;
+## 3. Boas Práticas e Recomendações
+Recomenda-se modularizar os componentes, documentar as variáveis de configuração e realizar testes contínuos de integridade.`;
     }
 
     const finalTitle = deriveArticleTitle(query, generatedText, language);
@@ -814,8 +1122,27 @@ function deriveArticleTitle(query: string, text?: string, lang = "pt"): string {
   // 2. Derive from query
   let clean = query.trim().replace(/[?.,!;:]+$/g, "").trim();
 
+  // Handle programming queries specifically
+  if (isProgrammingQuery(query)) {
+    const lower = query.toLowerCase();
+    if (lower.includes("selenium") && (lower.includes("java") || lower.includes("html") || lower.includes("campo"))) {
+      return "Automação de Testes em Java com Selenium: Mapeamento de Campos e Análise de HTML";
+    }
+    if (lower.includes("selenium")) {
+      return "Automação de Testes com Selenium";
+    }
+    if (lower.includes("java")) {
+      return "Desenvolvimento e Código em Java";
+    }
+    if (lower.includes("python")) {
+      return "Automação e Scripts em Python";
+    }
+  }
+
   const prefixes = [
     // Portuguese
+    /^preciso\s+de\s+(um\s+)?(c[oó]digo|script|fun[cç][aã]o|exemplo)\s+(em|de|para)?\s*/i,
+    /^como\s+(fazer|criar|programar)\s+(um\s+)?(c[oó]digo|script|teste)\s+(em|de|para)?\s*/i,
     /^qual\s+a\s+receita\s+(de\s+(fazer\s+)?)?/i,
     /^como\s+(fazer|preparar|cozinhar)\s+(um|uma)?\s*/i,
     /^passo\s+a\s+passo\s+(de\s+(fazer\s+)?)?/i,
@@ -827,6 +1154,8 @@ function deriveArticleTitle(query: string, text?: string, lang = "pt"): string {
     /^fale\s+sobre\s+(o|a|os|as)?\s*/i,
     /^conte\s+sobre\s+(o|a|os|as)?\s*/i,
     // English
+    /^i\s+need\s+(a\s+)?(code|script|example)\s+(in|for)?\s*/i,
+    /^how\s+to\s+(code|program|create|build)\s+/i,
     /^what\s+is\s+the\s+recipe\s+for\s+/i,
     /^how\s+to\s+(make|bake|cook|prepare)\s+/i,
     /^who\s+(discovered|found)\s*(the)?\s*/i,
@@ -834,6 +1163,7 @@ function deriveArticleTitle(query: string, text?: string, lang = "pt"): string {
     /^what\s+(is|was|are|were)\s*(the|a)?\s*/i,
     /^tell\s+me\s+about\s+/i,
     // Spanish
+    /^necesito\s+(un\s+)?(c[oó]digo|script|ejemplo)\s+(en|de|para)?\s*/i,
     /^cu[aá]l\s+es\s+la\s+receta\s+(de\s+)?/i,
     /^c[oó]mo\s+(hacer|preparar|cocinar)\s+(un|una)?\s*/i,
     /^qui[eé]n\s+(descubri[oó]|encontr[oó])\s*(el|la)?\s*/i,

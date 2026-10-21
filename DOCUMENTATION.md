@@ -159,17 +159,18 @@ O MFSTECH-OpenPedia conta com um assistente de pesquisa inteligente e factual co
 
 - **Motor Generativo Primário (Google Gemini)**: Processamento de perguntas complexas, científicas, históricas e técnicas em segundos, gerando artigos enciclopédicos estruturados em Markdown com seções lógicas, conceitos aprofundados e conclusões.
 - **Resolvedores Especializados de Domínio de Alta Performance**:
+  - **Engenharia de Software, Testes e Código (Java, Selenium, DOM Analysis)**: Consultas que solicitam código, scripts, automação ou testes com Selenium, Java, Python, etc., são reconhecidas de imediato. A resposta fornece arquitetura completa, dependências Maven (`pom.xml`), código Java completo e compilável (`HtmlFormDynamicTester.java`) com leitura e mapeamento de elementos DOM (`input`, `textarea`, `select`), análise heurística de campos, plano de testes dinâmico, inserção de dados sintéticos com espera explícita (`WebDriverWait`) e validação de submissão.
   - **Linux e Otimização de Recursos**: Resposta instantânea e completa para selecção de distribuições Linux por desempenho, consumo de RAM em idle e economia de disco (Alpine, Puppy Linux, Lubuntu, Xubuntu, antiX, Arch Linux, Debian Minimal) com tabelas comparativas detalhadas e recomendações práticas.
   - **Ciência Avançada e Física Nuclear**: Análise detalhada sobre fusão nuclear vs. fissão, confinamento magnético (Tokamak e Stellarator / ITER) e desafios tecnológicos de geração limpa.
   - **Detetor Especializado de Receitas**: Consultas gastronómicas e culinárias são identificadas e respondidas diretamente com listas precisas de ingredientes e modo de preparo passo a passo, sem introduções históricas supérfluas.
-- **Extração Automática de Títulos**: O sistema deduz inteligentemente o título mais adequado para o tema pesquisado (corrigindo erros de digitação e removendo termos interrogativos) e preenche automaticamente o campo `(Title)` ao clicar em "Inserir no Artigo".
+- **Extração Automática de Títulos**: O sistema deduz inteligentemente o título mais adequado para o tema pesquisado (corrigindo erros de digitação e removendo termos interrogativos ou pedidos de código como "preciso de um código...") e preenche automaticamente o campo `(Title)` ao clicar em "Inserir no Artigo".
 - **Cascata Multi-Camadas (High-Resilience Fallback)**:
-  1. Resolvedores Rápidos de Domínio (Linux, Física Nuclear, Receitas);
+  1. Resolvedores Rápidos de Domínio (Engenharia de Software/Código, Linux, Física Nuclear, Receitas);
   2. Google Gemini Flash (quando configurada chave em ambiente);
   3. Wikilivros / Wikibooks Culinária;
   4. Pollinations AI;
   5. Wikipedia Factual com extração de palavras-chave limpas;
   6. DuckDuckGo Instant Answers;
-  7. Síntese Temática Conceitual Estruturada com garantia de resposta HTTP 200 (sempre traz o conteúdo na caixa sem erros).
+  7. Síntese Temática Conceitual Estruturada com garantia de resposta HTTP 200 (sempre traz o conteúdo na caixa sem erros e sem clichês genéricos).
 - **Navegação Sem Interrupções**: Resposta 100% contida dentro da caixa de resposta, garantindo cópia imediata (`Ctrl+C` / botão de cópia com auto-fecho) ou inserção direta no editor com preenchimento simultâneo de título e corpo.
 

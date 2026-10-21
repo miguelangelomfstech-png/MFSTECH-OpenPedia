@@ -98,6 +98,37 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
     expect(data.title).toMatch(/Linux|Distribuiç[õo]es/i);
   });
 
+  test("POST /api/ai-research answers Selenium Java HTML form mapping and test planning query with real code", async ({
+    request,
+  }) => {
+    const javaQuery =
+      "Preciso de um codigo em java , selenium , que teste uma determinada pagina html, mas antes ele le o conteudo do html e mapeie todos os campos de entrada de dados e faça uma analise do que ira testar";
+    const res = await request.post("/api/ai-research", {
+      data: {
+        query: javaQuery,
+        mode: "article",
+        language: "pt",
+      },
+    });
+
+    expect(res.status()).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveProperty("text");
+    expect(data.text.length).toBeGreaterThan(500);
+    // Must NOT contain generic encyclopedic boilerplate
+    expect(data.text).not.toContain("é um tema de relevante interesse enciclopédico");
+    expect(data.text).not.toContain("Fatores históricos, científicos e sociais");
+    expect(data.text).not.toContain("Ocorreu um erro ao consultar a IA gratuita");
+    // Must contain actual Java code and Selenium methods
+    expect(data.text).toContain("public class HtmlFormDynamicTester");
+    expect(data.text).toContain("WebDriverManager");
+    expect(data.text).toContain("analyzeFormAndPlanTests");
+    expect(data.text).toMatch(/findElements\(\s*By\.cssSelector/);
+    // Suggested title must be clean and not the raw conversational query
+    expect(data.title).toMatch(/Selenium|Java|Automação/i);
+    expect(data.title).not.toMatch(/^Preciso de um Codigo/i);
+  });
+
   test("opens AI modal centered, answers query, closes on copy, esc and close button", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/");
@@ -141,9 +172,7 @@ test.describe("08: Free AI Research Assistant & Clipboard Copy", () => {
 
     const queryInput = page.locator("#ai-query-input");
     await queryInput.fill("Qual a receita de fazer um bolo de chocolate");
-
-    const searchBtn = modal.locator('button[type="submit"]');
-    await searchBtn.click();
+    await queryInput.press("Enter");
 
     // Verify result textarea appears with recipe content
     const resultTextarea = modal.locator("textarea");

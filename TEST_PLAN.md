@@ -284,3 +284,18 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
   - Sugere título coerente `"Guia Completo das Melhores Distribuições Linux: Performance e Economia de Recursos"`.
 - **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
 
+#### TC-032: Resolução Especializada para Código, Automação e Testes (Java, Selenium e Mapeamento DOM)
+- **Passos**:
+  1. Enviar requisição POST para `/api/ai-research` com a pergunta: `"Preciso de um codigo em java , selenium , que teste uma determinada pagina html, mas antes ele le o conteudo do html e mapeie todos os campos de entrada de dados e faça uma analise do que ira testar"`.
+  2. Verificar o status da resposta e o corpo de texto retornado.
+- **Resultado Esperado**:
+  - Retorna HTTP 200 contendo código fonte executável em Java (`HtmlFormDynamicTester.java`).
+  - Utiliza Selenium WebDriver e WebDriverManager (`io.github.bonigarcia:webdrivermanager`).
+  - Implementa mapeamento de campos DOM (`driver.findElements(By.cssSelector("input, textarea, select"))`).
+  - Realiza análise heurística dos campos de entrada (identificação de `email`, `password`, `text`, `submit`).
+  - Elabora plano de teste e executa inserções sintéticas automatizadas com espera explícita (`WebDriverWait`).
+  - Sugere título limpo e técnico `"Automação de Testes em Java com Selenium: Mapeamento de Campos e Análise de HTML"`, sem ecos de frases coloquiais ("Preciso de um codigo...").
+  - Ausência de boilerplate enciclopédico irrelevante ("evolução histórica", "fatores científicos e sociais").
+- **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
+
+
