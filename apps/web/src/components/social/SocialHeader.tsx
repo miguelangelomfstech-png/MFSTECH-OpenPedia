@@ -5,14 +5,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { dict, type Locale } from "@/lib/i18n-config";
+import { logout } from "@/app/actions";
 
-export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale }) {
+export interface SocialUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  image?: string | null;
+}
+
+interface SocialHeaderProps {
+  currentLocale?: Locale;
+  currentUser?: SocialUser | null;
+  isAdmin?: boolean;
+}
+
+export function SocialHeader({ currentLocale = "pt", currentUser, isAdmin = false }: SocialHeaderProps) {
   const t = dict[currentLocale] || dict.pt;
 
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        {/* Branding MFSTECH SOCIAL */}
+        {/* Branding MFSTECH SOCIAL & Status Admin */}
         <div className="flex items-center gap-3">
           <Link href="/social" className="flex items-center gap-2.5 group">
             <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-neutral-700 bg-neutral-900 shadow-md transition-transform group-hover:scale-105">
@@ -33,6 +48,15 @@ export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale 
                 <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 border border-blue-500/20">
                   {t.socialBadge}
                 </span>
+                {isAdmin && (
+                  <span
+                    data-testid="social-admin-indicator"
+                    className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-300 shadow-xs"
+                    title={t.socialAdminMode}
+                  >
+                    👑 {t.socialAdminBadge}
+                  </span>
+                )}
               </div>
               <p className="text-[11px] text-neutral-400 hidden sm:block">
                 {t.socialSubtitle}
@@ -41,8 +65,8 @@ export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale 
           </Link>
         </div>
 
-        {/* Links Rápidos, Seletor de Idiomas e Ações */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Links Rápidos, Seletor de Idiomas, Controlo de Conta e Ações */}
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
           {/* Seletor de Idiomas com 5 Línguas (PT, EN, ES, FR, IT) */}
           <div data-testid="social-language-selector">
             <LanguageSelector currentLocale={currentLocale} id="social-language-select" />
@@ -74,6 +98,56 @@ export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale 
             <span className="hidden md:inline">mfstechsocial@gmail.com</span>
           </a>
 
+          {/* Controlo de Conta (Login / Logout / Admin info) */}
+          <div data-testid="social-account-control" className="flex items-center gap-1.5">
+            {currentUser ? (
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={`/user/${encodeURIComponent(currentUser.name || "User")}`}
+                  data-testid="social-user-profile-btn"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 border border-neutral-800 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-neutral-700 transition-all"
+                  title={currentUser.email || currentUser.name || "Perfil"}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-bold">
+                    {(currentUser.name || "U").charAt(0).toUpperCase()}
+                  </span>
+                  <span className="max-w-[100px] truncate">{currentUser.name}</span>
+                  {isAdmin && <span className="text-amber-400 text-xs">👑</span>}
+                </Link>
+
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    data-testid="social-logout-btn"
+                    className="inline-flex items-center rounded-xl bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:text-red-400 hover:bg-neutral-800 transition-all"
+                    title={t.socialLogout}
+                  >
+                    {t.socialLogout}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/login?next=/social"
+                  data-testid="social-login-btn"
+                  className="inline-flex items-center rounded-xl bg-blue-600 hover:bg-blue-500 px-3 py-1.5 text-xs font-bold text-white transition-all shadow-md active:scale-95"
+                  title={t.socialLogin}
+                >
+                  {t.socialLogin}
+                </Link>
+                <Link
+                  href="/register?next=/social"
+                  data-testid="social-register-btn"
+                  className="hidden sm:inline-flex items-center rounded-xl bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white transition-all"
+                  title={t.socialRegister}
+                >
+                  {t.socialRegister}
+                </Link>
+              </div>
+            )}
+          </div>
+
           {/* Voltar à Enciclopédia */}
           <Link
             href="/"
@@ -87,3 +161,4 @@ export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale 
     </header>
   );
 }
+

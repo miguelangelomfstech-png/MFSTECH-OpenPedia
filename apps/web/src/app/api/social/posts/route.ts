@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db, socialPosts, socialComments, desc, eq } from "@wiki/db";
 import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl } from "@/lib/social-media";
+import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,11 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const raw = await req.text();
+    if (!raw || !raw.trim()) {
+      return NextResponse.json({ success: false, error: "Corpo da requisição vazio." }, { status: 400 });
+    }
+    const body = JSON.parse(raw);
     const { title, content, authorName, authorEmail, mediaUrl, googlePhotosTitle } = body;
 
     if (!content || typeof content !== "string" || !content.trim()) {
@@ -106,3 +111,49 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Erro ao criar publicação." }, { status: 500 });
   }
 }
+
+/**
+ * DELETE /api/social/posts
+ * Remove uma publicação e todos os seus comentários associados.
+ * Apenas Administradores ou o autor da publicação podem remover.
+ */
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "ID da publicação é obrigatório." }, { status: 400 });
+    }
+
+    const { user, actor } = await getViewer();
+    const isAdmin = actor.role === "admin" || actor.role === "bureaucrat" || user?.email === "mfstechsocial@gmail.com";
+
+    // Buscar a publicação
+    const [post] = await db.select().from(socialPosts).where(eq(socialPosts.id, id));
+    if (!post) {
+      return NextResponse.json({ success: false, error: "Publicação não encontrada." }, { status: 404 });
+    }
+
+    // Validação de permissões: admin ou autor do post
+    const isAuthor = user && post.authorEmail && user.email?.toLowerCase() === post.authorEmail.toLowerCase();
+    if (!isAdmin && !isAuthor) {
+      return NextResponse.json(
+        { success: false, error: "Não tem permissão de administrador para remover esta publicação." },
+        { status: 403 }
+      );
+    }
+
+    // Remover publicação (os comentários são removidos automaticamente via cascata onDelete na BD)
+    await db.delete(socialPosts).where(eq(socialPosts.id, id));
+
+    return NextResponse.json({
+      success: true,
+      message: "Publicação removida com sucesso.",
+    });
+  } catch (error) {
+    console.error("DELETE /api/social/posts error:", error);
+    return NextResponse.json({ success: false, error: "Erro ao remover publicação." }, { status: 500 });
+  }
+}
+

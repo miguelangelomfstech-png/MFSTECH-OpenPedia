@@ -52,13 +52,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user }) {
       if (user?.email) {
-        const [u] = await db.select({ id: users.id }).from(users).where(eq(users.email, user.email.toLowerCase()));
-        if (u) token.uid = u.id;
+        const [u] = await db.select({ id: users.id, role: users.role }).from(users).where(eq(users.email, user.email.toLowerCase()));
+        if (u) {
+          token.uid = u.id;
+          token.role = u.role;
+        }
       }
       return token;
     },
     async session({ session, token }) {
-      if (token.uid && session.user) session.user.id = token.uid as string;
+      if (token.uid && session.user) {
+        session.user.id = token.uid as string;
+        session.user.role = token.role as string;
+      }
       return session;
     },
   },

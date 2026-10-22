@@ -52,7 +52,7 @@ export function AuthForm({
         </div>
       )}
       {state?.error && <p role="alert" className="text-red">{state.error}</p>}
-      <button className="btn btn-primary w-full justify-center" disabled={pending}>{pending ? "Please wait…" : submit}</button>
+      <button type="submit" className="btn btn-primary w-full justify-center" disabled={pending}>{pending ? "Please wait…" : submit}</button>
     </form>
   );
 }

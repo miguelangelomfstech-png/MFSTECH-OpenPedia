@@ -5,16 +5,21 @@ import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl } from "@/lib/so
 import { dict, type Locale } from "@/lib/i18n-config";
 
 interface CreatePostModalProps {
-  onPostCreated?: () => void;
+  onPostCreated?: (newPost?: any) => void;
   currentLocale?: Locale;
+  currentUser?: { id?: string; name?: string | null; email?: string | null; role?: string | null } | null;
 }
 
-export function CreatePostModal({ onPostCreated, currentLocale = "pt" }: CreatePostModalProps) {
+export function CreatePostModal({
+  onPostCreated,
+  currentLocale = "pt",
+  currentUser,
+}: CreatePostModalProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
-  const [authorName, setAuthorName] = useState("");
+  const [authorName, setAuthorName] = useState(currentUser?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,8 +43,8 @@ export function CreatePostModal({ onPostCreated, currentLocale = "pt" }: CreateP
           title: title.trim() || null,
           content: content.trim(),
           mediaUrl: mediaUrl.trim() || null,
-          authorName: authorName.trim() || t.socialBadge,
-          authorEmail: "mfstechsocial@gmail.com",
+          authorName: authorName.trim() || currentUser?.name || t.socialBadge,
+          authorEmail: currentUser?.email || "mfstechsocial@gmail.com",
         }),
       });
 
@@ -54,7 +59,7 @@ export function CreatePostModal({ onPostCreated, currentLocale = "pt" }: CreateP
       setOpen(false);
 
       if (onPostCreated) {
-        onPostCreated();
+        onPostCreated(json.data);
       }
     } catch (err: any) {
       setError(err.message || "Não foi possível criar a publicação.");

@@ -150,5 +150,97 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     await langSelect.selectOption("pt");
     await expect(page.locator("text=Comunidade").first()).toBeVisible({ timeout: 10000 });
   });
+
+  test("exibe opções de controle de conta (Entrar / Criar Conta) no cabeçalho para visitantes", async ({ page }) => {
+    await page.goto("/social");
+
+    // Localiza secção de controlo de conta
+    const accountControl = page.locator("[data-testid='social-account-control']");
+    await expect(accountControl).toBeVisible();
+
+    // Valida presença dos botões de login e registro direcionando para /social
+    const loginBtn = page.locator("[data-testid='social-login-btn']");
+    await expect(loginBtn).toBeVisible();
+    await expect(loginBtn).toHaveAttribute("href", "/login?next=/social");
+
+    const registerBtn = page.locator("[data-testid='social-register-btn']");
+    await expect(registerBtn).toBeVisible();
+    await expect(registerBtn).toHaveAttribute("href", "/register?next=/social");
+  });
+
+  test("permite ao administrador moderar a rede social com remoção de publicações e comentários", async ({ page }) => {
+    test.setTimeout(90000);
+    // 1. Efectua login com conta de administrador
+    await page.goto("/login?next=/social");
+
+    // Fecha banner RGPD se visível (suporta PT e EN)
+    const rgpdBtn = page.locator("button:has-text('Aceitar Todos'), button:has-text('Apenas Necessários'), button:has-text('Accept All'), button:has-text('Essential Only')").first();
+    if (await rgpdBtn.isVisible()) {
+      await rgpdBtn.click();
+    }
+
+    await page.locator('input[name="email"]').fill("admin@example.com");
+    await page.locator('input[name="password"]').fill("changeme-admin");
+    await page.locator("button[type='submit']").click();
+
+    // Aguarda redirecionamento de volta ao MFSTECH SOCIAL
+    await page.waitForURL((url) => url.pathname === "/social", { timeout: 30000 });
+    await expect(page).toHaveTitle(/MFSTECH SOCIAL/i);
+
+    // Valida indicador visual de Administrador no cabeçalho social
+    const adminIndicator = page.locator("[data-testid='social-admin-indicator']");
+    await expect(adminIndicator).toBeVisible();
+    await expect(adminIndicator).toContainText(/Admin/i);
+
+    // Valida perfil do administrador logado
+    const profileBtn = page.locator("[data-testid='social-user-profile-btn']");
+    await expect(profileBtn).toBeVisible();
+    await expect(profileBtn).toContainText(/Admin/i);
+
+    // 2. Testa criação e remoção imediata de publicação pelo administrador
+    const openBtn = page.locator("#open-create-post-btn");
+    await openBtn.click();
+    const modal = page.locator("div[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    const deletePostTitle = `Post Teste Para Remover ${Date.now()}`;
+    await modal.locator("[data-testid='post-title-input']").fill(deletePostTitle);
+    await modal.locator("[data-testid='post-content-input']").fill("Publicação criada para teste de moderação administrativa.");
+    await modal.locator("[data-testid='post-submit-btn']").click();
+
+    // Aguarda fechamento do modal e que o post apareça no feed
+    await expect(modal).not.toBeVisible({ timeout: 30000 });
+    await expect(page.locator(`h3:has-text('${deletePostTitle}')`)).toBeVisible({ timeout: 30000 });
+
+    // Localiza o card da publicação criada e clica no botão de remover com aceitação do diálogo
+    page.once("dialog", (dialog) => dialog.accept());
+    const postToDelete = page.locator(`article:has-text('${deletePostTitle}')`);
+    const deletePostBtn = postToDelete.locator("[data-testid='delete-post-btn']");
+    await expect(deletePostBtn).toBeVisible();
+    await deletePostBtn.click();
+
+    // Valida que a publicação foi removida do feed
+    await expect(page.locator(`h3:has-text('${deletePostTitle}')`)).not.toBeVisible({ timeout: 30000 });
+
+    // 3. Testa remoção de comentário pelo administrador
+    const firstPost = page.locator("[data-testid='social-post-card']").first();
+    const commentsSection = firstPost.locator("[data-testid='comments-section']");
+    const testCommentText = `Comentário Teste Para Moderação ${Date.now()}`;
+
+    await commentsSection.locator("[data-testid='comment-content-input']").fill(testCommentText);
+    await commentsSection.locator("[data-testid='comment-submit-btn']").click();
+
+    // Valida que o comentário apareceu
+    const commentItem = commentsSection.locator(`div[data-testid='comment-item']:has-text('${testCommentText}')`);
+    await expect(commentItem).toBeVisible({ timeout: 30000 });
+
+    // Clica no botão de remoção do comentário
+    const deleteCommentBtn = commentItem.locator("[data-testid='delete-comment-btn']");
+    await expect(deleteCommentBtn).toBeVisible();
+    await deleteCommentBtn.click();
+
+    // Valida que o comentário foi removido em tempo real
+    await expect(commentsSection.locator(`text=${testCommentText}`)).not.toBeVisible({ timeout: 30000 });
+  });
 });
 

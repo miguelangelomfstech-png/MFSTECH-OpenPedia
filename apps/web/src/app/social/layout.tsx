@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import React from "react";
 import { SocialHeader } from "@/components/social/SocialHeader";
 import { getLocale } from "@/lib/i18n";
+import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = {
   title: "MFSTECH SOCIAL — Mídia Social, Vídeos & Fotografias",
@@ -17,10 +18,22 @@ export const metadata: Metadata = {
 
 export default async function SocialLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
+  const { user, actor } = await getViewer();
+  const isAdmin = actor.role === "admin" || actor.role === "bureaucrat" || user?.email === "mfstechsocial@gmail.com";
+
+  const userSummary = user
+    ? {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image ?? null,
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-blue-600 selection:text-white flex flex-col">
-      <SocialHeader currentLocale={locale} />
+      <SocialHeader currentLocale={locale} currentUser={userSummary} isAdmin={isAdmin} />
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         {children}
       </main>

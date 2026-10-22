@@ -17,12 +17,20 @@ interface CommentBoxProps {
   postId: string;
   initialComments?: CommentData[];
   currentLocale?: Locale;
+  currentUser?: { id?: string; name?: string | null; email?: string | null; role?: string | null } | null;
+  isAdmin?: boolean;
 }
 
-export function CommentBox({ postId, initialComments = [], currentLocale = "pt" }: CommentBoxProps) {
+export function CommentBox({
+  postId,
+  initialComments = [],
+  currentLocale = "pt",
+  currentUser,
+  isAdmin = false,
+}: CommentBoxProps) {
   const [comments, setComments] = useState<CommentData[]>(initialComments);
   const [content, setContent] = useState("");
-  const [authorName, setAuthorName] = useState("");
+  const [authorName, setAuthorName] = useState(currentUser?.name ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +50,8 @@ export function CommentBox({ postId, initialComments = [], currentLocale = "pt" 
         body: JSON.stringify({
           postId,
           content: content.trim(),
-          authorName: authorName.trim() || t.socialBadge,
+          authorName: authorName.trim() || currentUser?.name || t.socialBadge,
+          authorEmail: currentUser?.email || undefined,
         }),
       });
 
@@ -136,6 +145,8 @@ export function CommentBox({ postId, initialComments = [], currentLocale = "pt" 
                 })
               : "Agora mesmo";
 
+            const canDeleteComment = isAdmin || !currentUser || (currentUser && currentUser.email?.toLowerCase() === comment.authorEmail?.toLowerCase());
+
             return (
               <div
                 key={comment.id}
@@ -148,13 +159,22 @@ export function CommentBox({ postId, initialComments = [], currentLocale = "pt" 
                     <span>•</span>
                     <span className="text-neutral-500">{dateStr}</span>
                   </div>
-                  <button
-                    onClick={() => handleDelete(comment.id)}
-                    className="opacity-0 group-hover:opacity-100 text-[10px] text-neutral-500 hover:text-red-400 transition-opacity"
-                    title="Remover comentário"
-                  >
-                    ✕
-                  </button>
+                  {canDeleteComment && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(comment.id)}
+                      data-testid="delete-comment-btn"
+                      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-all ${
+                        isAdmin
+                          ? "text-red-400 bg-red-500/10 hover:bg-red-500/25 border border-red-500/20"
+                          : "opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-400 hover:bg-neutral-800"
+                      }`}
+                      title={t.socialDeleteComment}
+                    >
+                      <span>✕</span>
+                      {isAdmin && <span className="hidden sm:inline">{t.socialDeleteComment}</span>}
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed break-words">
                   {comment.content}

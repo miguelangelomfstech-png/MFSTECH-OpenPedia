@@ -28,9 +28,16 @@ export interface SocialPostData {
 interface SocialFeedProps {
   initialPosts?: SocialPostData[];
   currentLocale?: Locale;
+  currentUser?: { id?: string; name?: string | null; email?: string | null; role?: string | null } | null;
+  isAdmin?: boolean;
 }
 
-export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFeedProps) {
+export function SocialFeed({
+  initialPosts = [],
+  currentLocale = "pt",
+  currentUser,
+  isAdmin = false,
+}: SocialFeedProps) {
   const [posts, setPosts] = useState<SocialPostData[]>(initialPosts);
   const [filter, setFilter] = useState<"all" | "youtube" | "google_photos">("all");
   const [loading, setLoading] = useState(false);
@@ -52,6 +59,28 @@ export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFe
     }
   }, []);
 
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm(t.socialConfirmDeletePost)) return;
+    try {
+      const res = await fetch(`/api/social/posts?id=${postId}`, { method: "DELETE" });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      } else {
+        alert(json.error || "Erro ao remover publicação.");
+      }
+    } catch (err) {
+      console.error("Erro ao remover post:", err);
+    }
+  };
+
+  const handlePostCreated = (newPost?: SocialPostData) => {
+    if (newPost) {
+      setPosts((prev) => [newPost, ...prev.filter((p) => p.id !== newPost.id)]);
+    }
+    fetchPosts();
+  };
+
   useEffect(() => {
     if (initialPosts.length === 0) {
       fetchPosts();
@@ -71,7 +100,7 @@ export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFe
   return (
     <div className="space-y-6">
       {/* Caixa de Criação de Post */}
-      <CreatePostModal onPostCreated={fetchPosts} currentLocale={currentLocale} />
+      <CreatePostModal onPostCreated={handlePostCreated} currentLocale={currentLocale} currentUser={currentUser} />
 
       {/* Barra de Filtros e Atualização */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800/80 pb-3">
@@ -146,6 +175,7 @@ export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFe
               : "Hoje";
 
             const isOfficial = post.authorEmail === "mfstechsocial@gmail.com";
+            const canDelete = isAdmin || (currentUser && currentUser.email?.toLowerCase() === post.authorEmail?.toLowerCase());
 
             return (
               <article
@@ -172,9 +202,23 @@ export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFe
                     </div>
                   </div>
 
-                  <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline">
-                    {post.authorEmail}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline">
+                      {post.authorEmail}
+                    </span>
+                    {canDelete && (
+                      <button
+                        type="button"
+                        data-testid="delete-post-btn"
+                        onClick={() => handleDeletePost(post.id)}
+                        className="inline-flex items-center gap-1 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-xs active:scale-95"
+                        title={t.socialDeletePost}
+                      >
+                        <span>🗑️</span>
+                        <span className="hidden sm:inline">{t.socialDeletePost}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Título (se houver) */}
@@ -213,6 +257,8 @@ export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFe
                   postId={post.id}
                   initialComments={post.comments}
                   currentLocale={currentLocale}
+                  currentUser={currentUser}
+                  isAdmin={isAdmin}
                 />
               </article>
             );

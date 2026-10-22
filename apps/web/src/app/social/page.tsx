@@ -3,11 +3,25 @@ import { db, socialPosts, socialComments, desc } from "@wiki/db";
 import { SocialFeed } from "@/components/social/SocialFeed";
 import { getLocale } from "@/lib/i18n";
 import { dict } from "@/lib/i18n-config";
+import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
 
 export default async function SocialPage() {
   const locale = await getLocale();
+  const { user, actor } = await getViewer();
+  const isAdmin = actor.role === "admin" || actor.role === "bureaucrat" || user?.email === "mfstechsocial@gmail.com";
+
+  const userSummary = user
+    ? {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image ?? null,
+      }
+    : null;
+
   const t = dict[locale] || dict.pt;
 
   let initialPosts: any[] = [];
@@ -66,10 +80,16 @@ export default async function SocialPage() {
         </div>
       </section>
 
-      {/* Feed Principal */}
+      {/* Feed Principal com Suporte a Controlo de Conta e Moderação Admin */}
       <section>
-        <SocialFeed initialPosts={initialPosts} currentLocale={locale} />
+        <SocialFeed
+          initialPosts={initialPosts}
+          currentLocale={locale}
+          currentUser={userSummary}
+          isAdmin={isAdmin}
+        />
       </section>
     </div>
   );
 }
+
