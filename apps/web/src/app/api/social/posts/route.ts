@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, socialPosts, socialComments, desc, eq } from "@wiki/db";
-import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl } from "@/lib/social-media";
+import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl, normalizePhotoUrl } from "@/lib/social-media";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         }
       } else if (isGooglePhotosUrl(potentialUrl)) {
         mediaType = "google_photos";
-        googlePhotosUrl = potentialUrl;
+        googlePhotosUrl = normalizePhotoUrl(potentialUrl);
       }
     }
 

@@ -37,8 +37,42 @@ export function isYouTubeUrl(url: string): boolean {
 }
 
 export function isGooglePhotosUrl(url: string): boolean {
-  if (!url) return false;
-  return /photos\.app\.goo\.gl|photos\.google\.com/i.test(url);
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  // 1. Links de álbuns ou partilha do Google Fotos
+  if (/photos\.app\.goo\.gl|photos\.google\.com/i.test(trimmed)) return true;
+  // 2. Endereço direto de foto do Google Fotos (lh3.googleusercontent.com, etc.)
+  if (/googleusercontent\.com/i.test(trimmed)) return true;
+  // 3. Imagens do Google Drive
+  if (/drive\.google\.com/i.test(trimmed)) return true;
+  // 4. Data URL de imagem (upload direto do dispositivo)
+  if (/^data:image\/[a-zA-Z0-9+.-]+;base64,/i.test(trimmed)) return true;
+  // 5. Links diretos para imagens (.jpg, .jpeg, .png, .webp, .gif, .svg)
+  if (/\.(jpe?g|png|webp|gif|svg)(\?.*)?$/i.test(trimmed)) return true;
+  return false;
+}
+
+export function isDirectImageUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (/^data:image\/[a-zA-Z0-9+.-]+;base64,/i.test(trimmed)) return true;
+  if (/googleusercontent\.com/i.test(trimmed)) return true;
+  if (/\.(jpe?g|png|webp|gif|svg)(\?.*)?$/i.test(trimmed)) return true;
+  if (/drive\.google\.com\/uc\?/i.test(trimmed)) return true;
+  return false;
+}
+
+export function normalizePhotoUrl(url: string): string {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+
+  // Converter link de partilha do Google Drive para visualização direta
+  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  if (driveMatch && driveMatch[1]) {
+    return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  }
+
+  return trimmed;
 }
 
 export function buildYouTubeWatchUrl(videoId: string, originalUrl?: string | null): string {
@@ -47,3 +81,4 @@ export function buildYouTubeWatchUrl(videoId: string, originalUrl?: string | nul
   }
   return `https://www.youtube.com/watch?v=${videoId}`;
 }
+

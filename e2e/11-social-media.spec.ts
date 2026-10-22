@@ -50,8 +50,8 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
   test("exibe álbum e integração com Google Fotos com botão de redirecionamento", async ({ page }) => {
     await page.goto("/social");
 
-    // Localiza o card do Google Fotos
-    const photosCard = page.locator("[data-testid='google-photos-card']").first();
+    // Localiza o card do álbum do Google Fotos
+    const photosCard = page.locator("[data-testid='google-photos-card']").filter({ has: page.locator("[data-testid='google-photos-direct-link'][href*='photos']") }).first();
     await expect(photosCard).toBeVisible();
 
     // Valida o botão direto para o Google Fotos
@@ -242,5 +242,58 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     // Valida que o comentário foi removido em tempo real
     await expect(commentsSection.locator(`text=${testCommentText}`)).not.toBeVisible({ timeout: 30000 });
   });
+
+  test("permite carregar foto e exibe a imagem real com suporte a zoom/lightbox no feed", async ({ page }) => {
+    await page.goto("/social");
+
+    // Fecha banner RGPD se visível
+    const rgpdBtn = page.locator("button:has-text('Aceitar Todos'), button:has-text('Apenas Necessários')").first();
+    if (await rgpdBtn.isVisible()) {
+      await rgpdBtn.click();
+    }
+
+    // Abre o modal de criação de post
+    const openBtn = page.locator("#open-create-post-btn");
+    await openBtn.click();
+    const modal = page.locator("div[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    // Valida a presença do botão de carregar foto do dispositivo
+    const uploadPhotoBtn = modal.locator("#upload-photo-btn");
+    await expect(uploadPhotoBtn).toBeVisible();
+
+    // Preenche com um link de foto direto (ou Google Photos image URL)
+    const photoTitle = `Foto Fotografia Real Teste ${Date.now()}`;
+    await modal.locator("[data-testid='post-title-input']").fill(photoTitle);
+    await modal.locator("[data-testid='post-content-input']").fill("Publicação de teste com imagem fotográfica real.");
+    
+    // Simula uma imagem válida em base64 (pixel transparente 1x1 png)
+    const samplePhotoUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+    await modal.locator("[data-testid='post-media-input']").fill(samplePhotoUrl);
+
+    // Submete a publicação
+    await modal.locator("[data-testid='post-submit-btn']").click();
+
+    // Valida fechamento do modal e que o post aparece com a imagem real <img>
+    await expect(modal).not.toBeVisible({ timeout: 30000 });
+    const createdPost = page.locator(`article:has-text('${photoTitle}')`);
+    await expect(createdPost).toBeVisible({ timeout: 30000 });
+
+    // Valida que a imagem real <img> está renderizada dentro do GooglePhotosCard
+    const renderedImg = createdPost.locator("[data-testid='google-photos-card'] img");
+    await expect(renderedImg).toBeVisible();
+    await expect(renderedImg).toHaveAttribute("src", samplePhotoUrl);
+
+    // Valida abertura do Lightbox ao clicar na imagem
+    await renderedImg.click();
+    const lightboxModal = page.locator("div[role='dialog']:has(img[alt='Ampliação'])");
+    await expect(lightboxModal).toBeVisible();
+
+    // Fecha o Lightbox
+    const closeLightboxBtn = lightboxModal.locator("button[title='Fechar']");
+    await closeLightboxBtn.click();
+    await expect(lightboxModal).not.toBeVisible();
+  });
 });
+
 

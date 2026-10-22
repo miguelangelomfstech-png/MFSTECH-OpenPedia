@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl } from "@/lib/social-media";
 import { dict, type Locale } from "@/lib/i18n-config";
 
@@ -20,13 +20,71 @@ export function CreatePostModal({
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
   const [authorName, setAuthorName] = useState(currentUser?.name ?? "");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const t = dict[currentLocale] || dict.pt;
 
   const detectedYouTubeId = isYouTubeUrl(mediaUrl) ? extractYouTubeVideoId(mediaUrl) : null;
-  const detectedGooglePhotos = isGooglePhotosUrl(mediaUrl);
+  const detectedGooglePhotos = isGooglePhotosUrl(mediaUrl) || !!photoPreview;
+
+  // Processa o upload de foto do telemóvel/computador com compressão client-side
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor, selecione um ficheiro de imagem válido (JPG, PNG, WebP).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Redimensionar mantendo proporções (max 1280px) para otimizar desempenho
+        const maxDimension = 1280;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.82);
+          setPhotoPreview(compressedDataUrl);
+          setMediaUrl(compressedDataUrl);
+          setError(null);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoPreview(null);
+    if (mediaUrl.startsWith("data:image/")) {
+      setMediaUrl("");
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,13 +94,15 @@ export function CreatePostModal({
     setError(null);
 
     try {
+      const finalMedia = photoPreview || mediaUrl.trim() || null;
+
       const res = await fetch("/api/social/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim() || null,
           content: content.trim(),
-          mediaUrl: mediaUrl.trim() || null,
+          mediaUrl: finalMedia,
           authorName: authorName.trim() || currentUser?.name || t.socialBadge,
           authorEmail: currentUser?.email || "mfstechsocial@gmail.com",
         }),
@@ -56,6 +116,7 @@ export function CreatePostModal({
       setTitle("");
       setContent("");
       setMediaUrl("");
+      setPhotoPreview(null);
       setOpen(false);
 
       if (onPostCreated) {
@@ -96,11 +157,11 @@ export function CreatePostModal({
 
       {/* Modal de Criação */}
       {open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn overflow-y-auto">
           <div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-950 p-6 shadow-2xl space-y-4"
+            className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-950 p-6 shadow-2xl space-y-4 my-8"
           >
             {/* Cabeçalho do Modal */}
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
@@ -168,33 +229,91 @@ export function CreatePostModal({
                 />
               </div>
 
-              {/* Campo para Link de Mídia (YouTube ou Google Fotos) */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-400 mb-1">
-                  {t.socialMediaUrl}
-                </label>
+              {/* Seção de Mídia: Botão de Upload de Foto e Campo de Link */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-neutral-400">
+                    {t.socialMediaUrl}
+                  </label>
+                  {/* Botão de Upload de Foto do Dispositivo */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    id="upload-photo-btn"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 text-[11px] font-semibold text-blue-300 transition-colors"
+                  >
+                    <span>📷</span>
+                    <span>{t.socialUploadPhoto}</span>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
+
                 <input
-                  type="url"
+                  type="text"
                   data-testid="post-media-input"
                   value={mediaUrl}
-                  onChange={(e) => setMediaUrl(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setMediaUrl(val);
+                    if (val.startsWith("data:image/") || /\.(jpe?g|png|webp|gif|svg)/i.test(val) || val.includes("googleusercontent.com")) {
+                      setPhotoPreview(val);
+                    } else if (!val) {
+                      setPhotoPreview(null);
+                    }
+                  }}
                   placeholder="https://www.youtube.com/watch?v=... ou https://photos.app.goo.gl/..."
                   className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+
+                <p className="text-[11px] text-neutral-400">
+                  💡 {t.socialPhotoTip}
+                </p>
               </div>
 
-              {/* Indicador de Pré-visualização Detectada */}
-              {detectedYouTubeId && (
+              {/* Pré-visualização da Foto Carregada */}
+              {photoPreview && (
+                <div className="relative rounded-xl border border-neutral-800 bg-neutral-900/90 p-2.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                      ✓ {t.socialPhotoUploaded}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemovePhoto}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      {t.socialRemovePhoto}
+                    </button>
+                  </div>
+                  <div className="relative aspect-video max-h-48 overflow-hidden rounded-lg bg-black flex items-center justify-center">
+                    <img
+                      src={photoPreview}
+                      alt="Pré-visualização"
+                      className="max-h-48 w-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Indicador de Pré-visualização de YouTube */}
+              {detectedYouTubeId && !photoPreview && (
                 <div className="flex items-center gap-2 rounded-xl bg-red-600/10 border border-red-500/20 p-2.5 text-xs text-red-400">
                   <span>▶️</span>
                   <span>Vídeo do YouTube detectado! Será executado dentro da publicação com link direto.</span>
                 </div>
               )}
 
-              {detectedGooglePhotos && (
+              {/* Indicador de Pré-visualização de Google Fotos por URL */}
+              {detectedGooglePhotos && !photoPreview && !detectedYouTubeId && (
                 <div className="flex items-center gap-2 rounded-xl bg-blue-600/10 border border-blue-500/20 p-2.5 text-xs text-blue-400">
                   <span>📷</span>
-                  <span>Link do Google Fotos detectado! Será integrado na publicação.</span>
+                  <span>Link de Fotos detectado! As fotografias serão integradas na publicação.</span>
                 </div>
               )}
 
