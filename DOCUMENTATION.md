@@ -96,7 +96,22 @@ NewProject/
 - **Inserção Direta no Editor**: Botão "Inserir no Artigo" que injeta o texto gerado na posição do cursor do editor Markdown.
 - **Atalhos Externos Gratuitos**: Links integrados para **Perplexity AI** e **DuckDuckGo AI Chat** com a pergunta já preenchida para pesquisa web aprofundada com fontes.
 
+### 3.9. MFSTECH SOCIAL — Plataforma de Mídia Social Multimédia (`/social`)
+- **Branding & Comunidade**: Rede social integrada com design premium, branding próprio e contacto oficial: `mfstechsocial@gmail.com`.
+- **Integração de Vídeos do YouTube**:
+  - **Player In-App**: Os vídeos do YouTube são executados e assistidos diretamente dentro do site em proporção 16:9 através de iframe responsivo e seguro (`youtube-nocookie.com/embed/...`).
+  - **Botão Direto Externo**: Cada publicação com vídeo inclui o botão "Assistir no YouTube ↗", permitindo ao utilizador abrir o vídeo original no YouTube em nova aba se preferir.
+- **Integração com Google Fotos**:
+  - Suporte a links diretos e álbuns compartilhados do Google Fotos.
+  - Visualizador de galeria com botão de acesso direto para visualização em alta resolução.
+- **Sistema de Comentários em Tempo Real**:
+  - Campo interativo para escrever e publicar comentários em qualquer post.
+  - Gravação persistente no banco de dados Neon PostgreSQL (`social_comments`) com atualização imediata sem recarregar a página.
+- **Criador de Publicações com Deteção de Links**:
+  - Modal intuitivo com deteção automática de URLs do YouTube e do Google Fotos, associando o player e metadados instantaneamente.
+
 ---
+
 
 ## 4. Esquema de Banco de Dados (Drizzle ORM)
 

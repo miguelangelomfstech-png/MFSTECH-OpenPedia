@@ -298,4 +298,49 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
   - Ausência de boilerplate enciclopédico irrelevante ("evolução histórica", "fatores científicos e sociais").
 - **Status**: **PASSOU** (Automatizado via `08-ai-research.spec.ts`).
 
+---
+
+### TS-13: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Comentários
+
+#### TC-033: Acesso a `/social`, Identidade Visual e Contacto Oficial
+- **Passos**:
+  1. Aceder à rota `/social`.
+  2. Verificar o título da página (`MFSTECH SOCIAL`).
+  3. Validar a presença do logótipo, badge oficial e email de contacto `mfstechsocial@gmail.com`.
+  4. Inspecionar o link direto para o canal do YouTube no cabeçalho com `target="_blank"`.
+- **Resultado Esperado**: A página carrega com layout moderno, exibindo o branding oficial do MFSTECH SOCIAL e o e-mail de suporte institucional.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+#### TC-034: Execução de Vídeo do YouTube In-App e Botão Direto
+- **Passos**:
+  1. Localizar uma publicação com vídeo do YouTube no feed (`[data-testid='youtube-card']`).
+  2. Inspecionar o elemento `<iframe>` embutido.
+  3. Verificar o botão "Assistir no YouTube ↗" (`[data-testid='youtube-direct-link']`).
+- **Resultado Esperado**: O vídeo pode ser reproduzido diretamente dentro da página através de iframe seguro (`youtube-nocookie.com/embed/`), e o botão externo direciona para a URL oficial no YouTube em nova aba.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+#### TC-035: Integração com Google Fotos e Botão de Redirecionamento
+- **Passos**:
+  1. Localizar um post com álbum ou imagem do Google Fotos (`[data-testid='google-photos-card']`).
+  2. Verificar a renderização do card e o botão "Abrir no Google Fotos ↗".
+- **Resultado Esperado**: Apresenta a pré-visualização da galeria com ligação direta para o álbum compartilhado no Google Fotos.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+#### TC-036: Envio e Renderização de Comentários em Tempo Real
+- **Passos**:
+  1. Em qualquer publicação do feed, localizar a seção de comentários.
+  2. Digitar um comentário no campo de entrada de texto e clicar em "Comentar".
+- **Resultado Esperado**: O comentário é gravado na base de dados Neon PostgreSQL via POST `/api/social/comments` e adicionado imediatamente à lista visível da publicação sem recarregar a página.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+#### TC-037: Publicação de Post com Detecção Automática de Link do YouTube
+- **Passos**:
+  1. Clicar no botão para abrir o modal de nova publicação (`#open-create-post-btn`).
+  2. Preencher título, mensagem e colar uma URL do YouTube (`https://www.youtube.com/watch?v=...`).
+  3. Verificar que o sistema detecta o link e exibe o badge indicador de vídeo.
+  4. Clicar em "Publicar Agora".
+- **Resultado Esperado**: A publicação é criada via POST `/api/social/posts`, o modal fecha e o novo post surge no topo do feed com o player do YouTube embutido e o botão de link externo.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+
 

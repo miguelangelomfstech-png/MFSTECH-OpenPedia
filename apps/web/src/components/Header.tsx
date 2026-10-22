@@ -43,6 +43,15 @@ export async function Header() {
             <span aria-hidden="true" className="text-sm">✍️</span>
             <span>{t("startWriting")}</span>
           </Link>
+          <Link
+            id="header-social-btn"
+            href="/social"
+            className="btn inline-flex items-center gap-1.5 font-semibold text-blue-400 border border-blue-500/30 hover:bg-blue-500/10"
+            title="MFSTECH SOCIAL"
+          >
+            <span aria-hidden="true" className="text-sm">🌐</span>
+            <span className="hidden lg:inline">MFSTECH SOCIAL</span>
+          </Link>
           <AiResearchModal currentLocale={locale} />
           <Link className="btn hidden sm:inline-flex" href="/recent">{t("recent")}</Link>
           <Link className="btn hidden sm:inline-flex" href="/upload">{t("upload")}</Link>

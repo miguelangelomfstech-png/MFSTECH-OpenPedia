@@ -178,3 +178,56 @@ export type Article = typeof articles.$inferSelect;
 export type Revision = typeof revisions.$inferSelect;
 export type Media = typeof media.$inferSelect;
 export type MediaRendition = typeof mediaRenditions.$inferSelect;
+
+/** ------------------------------------------------------------------
+ * MFSTECH SOCIAL — Tabelas da Rede Social Multimédia
+ * ------------------------------------------------------------------ */
+export const socialMediaTypeEnum = pgEnum("social_media_type", ["none", "youtube", "google_photos", "external"]);
+
+export const socialPosts = pgTable(
+  "social_posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    authorName: text("author_name").notNull().default("MFSTECH Oficial"),
+    authorEmail: text("author_email").notNull().default("mfstechsocial@gmail.com"),
+    authorAvatar: text("author_avatar"),
+    title: text("title"),
+    content: text("content").notNull(),
+    mediaType: socialMediaTypeEnum("media_type").notNull().default("none"),
+    youtubeVideoId: text("youtube_video_id"),
+    youtubeUrl: text("youtube_url"),
+    googlePhotosUrl: text("google_photos_url"),
+    googlePhotosTitle: text("google_photos_title"),
+    likesCount: integer("likes_count").notNull().default(0),
+    commentsCount: integer("comments_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("social_posts_created_idx").on(t.createdAt)],
+);
+
+export const socialComments = pgTable(
+  "social_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id").notNull().references(() => socialPosts.id, { onDelete: "cascade" }),
+    authorName: text("author_name").notNull().default("Comunidade MFSTECH"),
+    authorEmail: text("author_email"),
+    content: text("content").notNull(),
+    likesCount: integer("likes_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("social_comments_post_idx").on(t.postId, t.createdAt)],
+);
+
+export const socialPostsRelations = relations(socialPosts, ({ many }) => ({
+  comments: many(socialComments),
+}));
+
+export const socialCommentsRelations = relations(socialComments, ({ one }) => ({
+  post: one(socialPosts, { fields: [socialComments.postId], references: [socialPosts.id] }),
+}));
+
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type SocialComment = typeof socialComments.$inferSelect;
+
