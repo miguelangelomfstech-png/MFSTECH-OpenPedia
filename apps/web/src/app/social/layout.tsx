@@ -32,27 +32,47 @@ export default async function SocialLayout({ children }: { children: React.React
     : null;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-blue-600 selection:text-white flex flex-col">
-      <SocialHeader currentLocale={locale} currentUser={userSummary} isAdmin={isAdmin} />
-      <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
-        {children}
-      </main>
-      <footer className="border-t border-neutral-900 bg-neutral-950/80 py-8 text-center text-xs text-neutral-500">
-        <div className="mx-auto max-w-4xl px-4 space-y-2">
-          <p className="font-semibold text-neutral-400">
-            MFSTECH SOCIAL © {new Date().getFullYear()} — Todos os direitos reservados.
-          </p>
-          <p>
-            Contacto Oficial & Suporte:{" "}
-            <a
-              href="mailto:mfstechsocial@gmail.com"
-              className="text-blue-400 hover:underline font-mono"
-            >
-              mfstechsocial@gmail.com
-            </a>
-          </p>
-        </div>
-      </footer>
-    </div>
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            #openpedia-global-header,
+            #openpedia-global-footer {
+              display: none !important;
+            }
+            #content {
+              max-width: 100% !important;
+              padding: 0 !important;
+              margin: 0 !important;
+            }
+            body {
+              background-color: #0a0a0a !important;
+            }
+          `,
+        }}
+      />
+      <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-blue-600 selection:text-white flex flex-col w-full">
+        <SocialHeader currentLocale={locale} currentUser={userSummary} isAdmin={isAdmin} />
+        <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+          {children}
+        </main>
+        <footer className="border-t border-neutral-900 bg-neutral-950/80 py-8 text-center text-xs text-neutral-500">
+          <div className="mx-auto max-w-4xl px-4 space-y-2">
+            <p className="font-semibold text-neutral-400">
+              MFSTECH SOCIAL © {new Date().getFullYear()} — Todos os direitos reservados.
+            </p>
+            <p>
+              Contacto Oficial & Suporte:{" "}
+              <a
+                href="mailto:mfstechsocial@gmail.com"
+                className="text-blue-400 hover:underline font-mono"
+              >
+                mfstechsocial@gmail.com
+              </a>
+            </p>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
