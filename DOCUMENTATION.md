@@ -189,3 +189,29 @@ O MFSTECH-OpenPedia conta com um assistente de pesquisa inteligente e factual co
   7. Síntese Temática Conceitual Estruturada com garantia de resposta HTTP 200 (sempre traz o conteúdo na caixa sem erros e sem clichês genéricos).
 - **Navegação Sem Interrupções**: Resposta 100% contida dentro da caixa de resposta, garantindo cópia imediata (`Ctrl+C` / botão de cópia com auto-fecho) ou inserção direta no editor com preenchimento simultâneo de título e corpo.
 
+---
+
+## 7. MFSTECH SOCIAL — Plataforma de Mídia Social Multimídia
+
+O **MFSTECH SOCIAL** (`/social`) é a plataforma integrada de rede social, partilha e interação comunitária do ecossistema MFSTECH, projetada com o mesmo padrão profissional e arquitetura robusta do OpenPedia:
+
+- **E-mail Oficial de Contacto e Suporte**: `mfstechsocial@gmail.com`.
+- **Suporte Multi-idioma (i18n)**:
+  - Disponível em 5 línguas: 🇵🇹 Português (PT), 🇬🇧 Inglês (EN), 🇪🇸 Espanhol (ES), 🇫🇷 Francês (FR) e 🇮🇹 Italiano (IT).
+  - Comutação em tempo real via seletor dedicado no cabeçalho social (`#social-language-select`).
+  - Todos os elementos visuais traduzidos: cabeçalho, abas de filtro, botão de partilha, formulário de publicação, cards de mídia, botões de ação e área de comentários.
+- **Integração YouTube com Player In-App e Link Direto**:
+  - Deteção inteligente de qualquer link do YouTube (`youtube.com/watch?v=...`, `youtu.be/...`, shorts e embeds).
+  - Execução de vídeo responsiva 16:9 (`youtube-nocookie.com/embed/...`) diretamente dentro da página.
+  - Botão de acesso externo oficial ("Assistir no YouTube ↗" / "Watch on YouTube ↗" / "Ver en YouTube ↗") abrindo em nova aba com segurança (`target="_blank" rel="noopener noreferrer"`).
+- **Integração com Google Fotos**:
+  - Reconhecimento de links e álbuns do Google Fotos (`photos.app.goo.gl/...` e `photos.google.com/...`).
+  - Card estilizado de galeria com link direto ("Abrir no Google Fotos ↗" / "Open in Google Photos ↗").
+- **Área Interativa de Comentários em Tempo Real**:
+  - Secção interativa em cada publicação para submissão imediata de comentários e opiniões.
+  - Atualização instantânea da lista e contador de comentários.
+- **Base de Dados e Tabelas**:
+  - `socialPosts` e `socialComments` gerenciados via Drizzle ORM sobre PostgreSQL Neon.
+  - Rotas de API dedicadas: `GET /api/social/posts`, `POST /api/social/posts`, `POST /api/social/comments`, `DELETE /api/social/comments`.
+
+

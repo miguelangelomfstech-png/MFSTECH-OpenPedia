@@ -1,13 +1,17 @@
 "use client";
 
 import React from "react";
+import { dict, type Locale } from "@/lib/i18n-config";
 
 interface GooglePhotosCardProps {
   googlePhotosUrl: string;
   title?: string | null;
+  currentLocale?: Locale;
 }
 
-export function GooglePhotosCard({ googlePhotosUrl, title = "Álbum no Google Fotos" }: GooglePhotosCardProps) {
+export function GooglePhotosCard({ googlePhotosUrl, title = "Álbum no Google Fotos", currentLocale = "pt" }: GooglePhotosCardProps) {
+  const t = dict[currentLocale] || dict.pt;
+
   return (
     <div
       data-testid="google-photos-card"
@@ -20,7 +24,7 @@ export function GooglePhotosCard({ googlePhotosUrl, title = "Álbum no Google Fo
           </div>
           <div>
             <h4 className="text-sm font-bold text-white tracking-tight">
-              {title || "Álbum no Google Fotos"}
+              {title || t.socialGooglePhotos}
             </h4>
             <p className="text-[11px] text-neutral-400">
               Galeria de fotografias sincronizada com o Google Fotos
@@ -36,7 +40,7 @@ export function GooglePhotosCard({ googlePhotosUrl, title = "Álbum no Google Fo
           data-testid="google-photos-direct-link"
           className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 shrink-0"
         >
-          <span>Abrir no Google Fotos ↗</span>
+          <span>{t.socialOpenGooglePhotos}</span>
         </a>
       </div>
 

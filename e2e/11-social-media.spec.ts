@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Comentários", () => {
+  test.beforeEach(async ({ context }) => {
+    await context.clearCookies();
+  });
+
   test("acessa /social com identidade visual, branding e contacto mfstechsocial@gmail.com", async ({ page }) => {
     await page.goto("/social");
 
@@ -37,10 +41,10 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     // Valida a presença do botão de acesso direto ao YouTube
     const directLink = ytCard.locator("[data-testid='youtube-direct-link']");
     await expect(directLink).toBeVisible();
-    await expect(directLink).toHaveText(/Assistir no YouTube/i);
+    await expect(directLink).toHaveText(/Assistir no YouTube|Watch on YouTube/i);
     await expect(directLink).toHaveAttribute("target", "_blank");
     const href = await directLink.getAttribute("href");
-    expect(href).toMatch(/youtube\.com\/watch\?v=[a-zA-Z0-9_-]{11}/);
+    expect(href).toMatch(/(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/);
   });
 
   test("exibe álbum e integração com Google Fotos com botão de redirecionamento", async ({ page }) => {
@@ -53,7 +57,7 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     // Valida o botão direto para o Google Fotos
     const directLink = photosCard.locator("[data-testid='google-photos-direct-link']");
     await expect(directLink).toBeVisible();
-    await expect(directLink).toHaveText(/Abrir no Google Fotos/i);
+    await expect(directLink).toHaveText(/Abrir no Google Fotos|Open in Google Photos/i);
     await expect(directLink).toHaveAttribute("target", "_blank");
     const href = await directLink.getAttribute("href");
     expect(href).toMatch(/photos\.app\.goo\.gl|photos\.google\.com/);
@@ -69,12 +73,12 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     await expect(commentsSection).toBeVisible();
 
     // Preenche o campo de comentário
-    const commentInput = commentsSection.locator("input[placeholder*='comentário']");
+    const commentInput = commentsSection.locator("[data-testid='comment-content-input']");
     const testCommentText = `Comentário de Teste Automatizado ${Date.now()}`;
     await commentInput.fill(testCommentText);
 
     // Submete o comentário
-    const submitBtn = commentsSection.locator("button:has-text('Comentar')");
+    const submitBtn = commentsSection.locator("[data-testid='comment-submit-btn']");
     await submitBtn.click();
 
     // Verifica que o comentário aparece na lista de comentários em tempo real
@@ -100,12 +104,12 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
 
     // Preenche formulário
     const postTitle = `Vídeo de Engenharia ${Date.now()}`;
-    await modal.locator("input[placeholder*='Novidades']").fill(postTitle);
-    await modal.locator("textarea").fill("Partilhando um vídeo essencial de demonstração.");
-    await modal.locator("input[placeholder*='Cole aqui o link']").fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    await modal.locator("[data-testid='post-title-input']").fill(postTitle);
+    await modal.locator("[data-testid='post-content-input']").fill("Partilhando um vídeo essencial de demonstração.");
+    await modal.locator("[data-testid='post-media-input']").fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
     // Submete a publicação
-    await modal.locator("button:has-text('Publicar Agora')").click();
+    await modal.locator("[data-testid='post-submit-btn']").click();
 
     // Aguarda o fecho do modal e aparição no feed
     await expect(modal).not.toBeVisible();
@@ -117,4 +121,34 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     const iframe = newYtCard.locator("iframe");
     expect(await iframe.getAttribute("src")).toContain("dQw4w9WgXcQ");
   });
+
+  test("permite alternar idiomas no MFSTECH SOCIAL e atualiza os textos de interface (PT, EN, ES)", async ({ page }) => {
+    await page.goto("/social");
+
+    // Localiza seletor de idiomas do MFSTECH SOCIAL
+    const langSelect = page.locator("#social-language-select");
+    await expect(langSelect).toBeVisible();
+
+    // Comuta para Inglês (EN)
+    await langSelect.selectOption("en");
+    await expect(page.locator("text=Community").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=YouTube Videos").first()).toBeVisible();
+    await expect(page.locator("text=Watch on YouTube").first()).toBeVisible();
+
+    // Aguarda seletor estar disponível
+    await expect(langSelect).toBeEnabled();
+
+    // Comuta para Espanhol (ES)
+    await langSelect.selectOption("es");
+    await expect(page.locator("text=Comunidad").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Ver en YouTube").first()).toBeVisible();
+
+    // Aguarda seletor estar disponível
+    await expect(langSelect).toBeEnabled();
+
+    // Retorna para Português (PT)
+    await langSelect.selectOption("pt");
+    await expect(page.locator("text=Comunidade").first()).toBeVisible({ timeout: 10000 });
+  });
 });
+

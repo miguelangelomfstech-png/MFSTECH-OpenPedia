@@ -3,11 +3,15 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { dict, type Locale } from "@/lib/i18n-config";
 
-export function SocialHeader() {
+export function SocialHeader({ currentLocale = "pt" }: { currentLocale?: Locale }) {
+  const t = dict[currentLocale] || dict.pt;
+
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-950/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         {/* Branding MFSTECH SOCIAL */}
         <div className="flex items-center gap-3">
           <Link href="/social" className="flex items-center gap-2.5 group">
@@ -27,25 +31,30 @@ export function SocialHeader() {
                   MFSTECH SOCIAL
                 </span>
                 <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 border border-blue-500/20">
-                  Comunidade
+                  {t.socialBadge}
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 hidden sm:block">
-                Vídeos, Fotografias & Interação em Tempo Real
+                {t.socialSubtitle}
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Links Rápidos e Ações */}
-        <div className="flex items-center gap-2.5">
+        {/* Links Rápidos, Seletor de Idiomas e Ações */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Seletor de Idiomas com 5 Línguas (PT, EN, ES, FR, IT) */}
+          <div data-testid="social-language-selector">
+            <LanguageSelector currentLocale={currentLocale} id="social-language-select" />
+          </div>
+
           {/* Link para o YouTube Oficial */}
           <a
             href="https://www.youtube.com"
             target="_blank"
             rel="noopener noreferrer"
             id="header-youtube-link"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-red-600/15 border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-red-600/15 border border-red-500/30 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95"
             title="Aceder ao YouTube"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -58,7 +67,7 @@ export function SocialHeader() {
           <a
             href="mailto:mfstechsocial@gmail.com"
             id="header-contact-link"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white transition-all"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 border border-neutral-800 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-neutral-300 hover:bg-neutral-800 hover:text-white transition-all"
             title="Email de Contacto: mfstechsocial@gmail.com"
           >
             <span>✉</span>
@@ -68,7 +77,7 @@ export function SocialHeader() {
           {/* Voltar à Enciclopédia */}
           <Link
             href="/"
-            className="inline-flex items-center gap-1 rounded-xl bg-neutral-900 border border-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all"
+            className="inline-flex items-center gap-1 rounded-xl bg-neutral-900 border border-neutral-800 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-all"
           >
             <span>📖</span>
             <span className="hidden sm:inline">OpenPedia</span>

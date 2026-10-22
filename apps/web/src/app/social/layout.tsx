@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import React from "react";
 import { SocialHeader } from "@/components/social/SocialHeader";
+import { getLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "MFSTECH SOCIAL — Mídia Social, Vídeos & Fotografias",
@@ -14,10 +15,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SocialLayout({ children }: { children: React.ReactNode }) {
+export default async function SocialLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-blue-600 selection:text-white flex flex-col">
-      <SocialHeader />
+      <SocialHeader currentLocale={locale} />
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         {children}
       </main>

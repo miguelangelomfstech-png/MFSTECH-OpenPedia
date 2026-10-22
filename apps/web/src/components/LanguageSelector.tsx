@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LANGUAGES, LOCALES, type Locale } from "@/lib/i18n-config";
 
-export function LanguageSelector({ currentLocale }: { currentLocale: Locale }) {
+export function LanguageSelector({ currentLocale, id = "language-select" }: { currentLocale: Locale; id?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -24,7 +24,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: Locale }) {
 
   return (
     <div className="relative inline-flex items-center">
-      <label htmlFor="language-select" className="sr-only">
+      <label htmlFor={id} className="sr-only">
         Language
       </label>
       <div className="flex items-center gap-1.5 rounded-lg border border-line bg-surface/80 px-2.5 py-1 text-xs font-medium text-ink shadow-2xs hover:bg-surface focus-within:ring-2 focus-within:ring-accent">
@@ -32,7 +32,7 @@ export function LanguageSelector({ currentLocale }: { currentLocale: Locale }) {
           {current.flag}
         </span>
         <select
-          id="language-select"
+          id={id}
           value={currentLocale}
           onChange={handleChange}
           disabled={isPending}

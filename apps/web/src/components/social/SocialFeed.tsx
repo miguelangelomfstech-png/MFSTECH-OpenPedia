@@ -5,6 +5,7 @@ import { YouTubePlayerCard } from "./YouTubePlayerCard";
 import { GooglePhotosCard } from "./GooglePhotosCard";
 import { CommentBox, CommentData } from "./CommentBox";
 import { CreatePostModal } from "./CreatePostModal";
+import { dict, type Locale } from "@/lib/i18n-config";
 
 export interface SocialPostData {
   id: string;
@@ -24,10 +25,17 @@ export interface SocialPostData {
   comments: CommentData[];
 }
 
-export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostData[] }) {
+interface SocialFeedProps {
+  initialPosts?: SocialPostData[];
+  currentLocale?: Locale;
+}
+
+export function SocialFeed({ initialPosts = [], currentLocale = "pt" }: SocialFeedProps) {
   const [posts, setPosts] = useState<SocialPostData[]>(initialPosts);
   const [filter, setFilter] = useState<"all" | "youtube" | "google_photos">("all");
   const [loading, setLoading] = useState(false);
+
+  const t = dict[currentLocale] || dict.pt;
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -63,7 +71,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
   return (
     <div className="space-y-6">
       {/* Caixa de Criação de Post */}
-      <CreatePostModal onPostCreated={fetchPosts} />
+      <CreatePostModal onPostCreated={fetchPosts} currentLocale={currentLocale} />
 
       {/* Barra de Filtros e Atualização */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800/80 pb-3">
@@ -77,7 +85,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
                 : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
             }`}
           >
-            🌟 Todas ({posts.length})
+            🌟 {t.socialAll} ({posts.length})
           </button>
           <button
             type="button"
@@ -90,7 +98,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
             }`}
           >
             <span>▶️</span>
-            <span>Vídeos YouTube</span>
+            <span>{t.socialYouTubeVideos}</span>
           </button>
           <button
             type="button"
@@ -103,7 +111,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
             }`}
           >
             <span>📷</span>
-            <span>Google Fotos</span>
+            <span>{t.socialGooglePhotos}</span>
           </button>
         </div>
 
@@ -114,7 +122,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
           className="text-xs text-neutral-400 hover:text-white transition-colors"
           title="Recarregar Feed"
         >
-          {loading ? "A atualizar..." : "🔄 Atualizar"}
+          {loading ? "..." : "🔄 Atualizar"}
         </button>
       </div>
 
@@ -123,13 +131,13 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
         {filteredPosts.length === 0 ? (
           <div className="rounded-2xl border border-neutral-800 bg-neutral-900/40 p-8 text-center">
             <p className="text-sm text-neutral-400">
-              Nenhuma publicação encontrada para este filtro.
+              {t.noResults}
             </p>
           </div>
         ) : (
           filteredPosts.map((post) => {
             const dateStr = typeof post.createdAt === "string"
-              ? new Date(post.createdAt).toLocaleDateString("pt-PT", {
+              ? new Date(post.createdAt).toLocaleDateString(currentLocale === "en" ? "en-US" : "pt-PT", {
                   hour: "2-digit",
                   minute: "2-digit",
                   day: "2-digit",
@@ -187,6 +195,7 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
                     videoId={post.youtubeVideoId}
                     youtubeUrl={post.youtubeUrl}
                     title={post.title}
+                    currentLocale={currentLocale}
                   />
                 )}
 
@@ -195,11 +204,16 @@ export function SocialFeed({ initialPosts = [] }: { initialPosts?: SocialPostDat
                   <GooglePhotosCard
                     googlePhotosUrl={post.googlePhotosUrl}
                     title={post.googlePhotosTitle || post.title}
+                    currentLocale={currentLocale}
                   />
                 )}
 
                 {/* Sistema Interativo de Comentários */}
-                <CommentBox postId={post.id} initialComments={post.comments} />
+                <CommentBox
+                  postId={post.id}
+                  initialComments={post.comments}
+                  currentLocale={currentLocale}
+                />
               </article>
             );
           })

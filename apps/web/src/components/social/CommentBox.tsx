@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { dict, type Locale } from "@/lib/i18n-config";
 
 export interface CommentData {
   id: string;
@@ -15,14 +16,17 @@ export interface CommentData {
 interface CommentBoxProps {
   postId: string;
   initialComments?: CommentData[];
+  currentLocale?: Locale;
 }
 
-export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
+export function CommentBox({ postId, initialComments = [], currentLocale = "pt" }: CommentBoxProps) {
   const [comments, setComments] = useState<CommentData[]>(initialComments);
   const [content, setContent] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const t = dict[currentLocale] || dict.pt;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,7 @@ export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
         body: JSON.stringify({
           postId,
           content: content.trim(),
-          authorName: authorName.trim() || "Membro da Comunidade",
+          authorName: authorName.trim() || t.socialBadge,
         }),
       });
 
@@ -73,10 +77,10 @@ export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
     <div className="mt-4 border-t border-neutral-800/80 pt-4" data-testid="comments-section">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
-          Comentários ({comments.length})
+          {t.socialComments} ({comments.length})
         </h4>
         <span className="text-[11px] text-neutral-500">
-          Participe da conversa
+          MFSTECH SOCIAL
         </span>
       </div>
 
@@ -85,25 +89,28 @@ export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
         <div className="flex gap-2">
           <input
             type="text"
+            data-testid="comment-author-input"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
-            placeholder="Seu nome (opcional)"
+            placeholder={t.socialYourName}
             className="w-1/3 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <input
             type="text"
+            data-testid="comment-content-input"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Escreva um comentário profissional..."
+            placeholder={t.socialCommentPlaceholder}
             required
             className="flex-1 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             type="submit"
+            data-testid="comment-submit-btn"
             disabled={loading || !content.trim()}
             className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 disabled:opacity-50 shrink-0"
           >
-            {loading ? "A enviar..." : "Comentar"}
+            {loading ? "..." : t.socialCommentBtn}
           </button>
         </div>
 
@@ -116,12 +123,12 @@ export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
       <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
         {comments.length === 0 ? (
           <p className="text-xs text-neutral-500 italic py-2">
-            Ainda não há comentários. Seja o primeiro a comentar!
+            {t.noResults}
           </p>
         ) : (
           comments.map((comment) => {
             const dateStr = typeof comment.createdAt === "string" 
-              ? new Date(comment.createdAt).toLocaleDateString("pt-PT", {
+              ? new Date(comment.createdAt).toLocaleDateString(currentLocale === "en" ? "en-US" : "pt-PT", {
                   hour: "2-digit",
                   minute: "2-digit",
                   day: "2-digit",
@@ -146,7 +153,7 @@ export function CommentBox({ postId, initialComments = [] }: CommentBoxProps) {
                     className="opacity-0 group-hover:opacity-100 text-[10px] text-neutral-500 hover:text-red-400 transition-opacity"
                     title="Remover comentário"
                   >
-                    Eliminar
+                    ✕
                   </button>
                 </div>
                 <p className="text-xs text-neutral-300 leading-relaxed break-words">

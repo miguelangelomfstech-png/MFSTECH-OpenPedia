@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl } from "@/lib/social-media";
+import { dict, type Locale } from "@/lib/i18n-config";
 
 interface CreatePostModalProps {
   onPostCreated?: () => void;
+  currentLocale?: Locale;
 }
 
-export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
+export function CreatePostModal({ onPostCreated, currentLocale = "pt" }: CreatePostModalProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -15,6 +17,8 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
   const [authorName, setAuthorName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const t = dict[currentLocale] || dict.pt;
 
   const detectedYouTubeId = isYouTubeUrl(mediaUrl) ? extractYouTubeVideoId(mediaUrl) : null;
   const detectedGooglePhotos = isGooglePhotosUrl(mediaUrl);
@@ -34,7 +38,7 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
           title: title.trim() || null,
           content: content.trim(),
           mediaUrl: mediaUrl.trim() || null,
-          authorName: authorName.trim() || "Utilizador MFSTECH",
+          authorName: authorName.trim() || t.socialBadge,
           authorEmail: "mfstechsocial@gmail.com",
         }),
       });
@@ -73,14 +77,14 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
             id="open-create-post-btn"
             className="flex-1 rounded-xl border border-neutral-800 bg-neutral-950/80 px-4 py-2.5 text-left text-sm text-neutral-400 hover:border-neutral-700 hover:text-neutral-300 transition-all shadow-inner"
           >
-            Partilhe um pensamento, link do YouTube ou Google Fotos...
+            {t.socialSharePrompt}
           </button>
           <button
             type="button"
             onClick={() => setOpen(true)}
             className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 shrink-0"
           >
-            Publicar
+            {t.socialPublish}
           </button>
         </div>
       </div>
@@ -98,7 +102,7 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
               <div className="flex items-center gap-2">
                 <span className="text-xl">✨</span>
                 <h3 className="text-base font-bold text-white">
-                  Nova Publicação no MFSTECH SOCIAL
+                  {t.socialNewPost}
                 </h3>
               </div>
               <button
@@ -116,10 +120,11 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
               {/* Nome do Autor */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-400 mb-1">
-                  Seu Nome ou Pseudónimo
+                  {t.socialYourName}
                 </label>
                 <input
                   type="text"
+                  data-testid="post-author-input"
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
                   placeholder="Ex.: Miguel Ângelo"
@@ -130,10 +135,11 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
               {/* Título da Publicação */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-400 mb-1">
-                  Título da Publicação (Opcional)
+                  {t.socialPostTitle}
                 </label>
                 <input
                   type="text"
+                  data-testid="post-title-input"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex.: Novidades de Engenharia de Software"
@@ -144,12 +150,13 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
               {/* Conteúdo / Mensagem */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-400 mb-1">
-                  Mensagem / Descrição <span className="text-red-400">*</span>
+                  {t.socialMessage} <span className="text-red-400">*</span>
                 </label>
                 <textarea
+                  data-testid="post-content-input"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="O que gostaria de partilhar com a comunidade?"
+                  placeholder={t.socialSharePrompt}
                   rows={4}
                   required
                   className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
@@ -159,13 +166,14 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
               {/* Campo para Link de Mídia (YouTube ou Google Fotos) */}
               <div>
                 <label className="block text-xs font-semibold text-neutral-400 mb-1">
-                  Link Multimédia (YouTube ou Google Fotos)
+                  {t.socialMediaUrl}
                 </label>
                 <input
                   type="url"
+                  data-testid="post-media-input"
                   value={mediaUrl}
                   onChange={(e) => setMediaUrl(e.target.value)}
-                  placeholder="Cole aqui o link do vídeo do YouTube ou álbum do Google Fotos..."
+                  placeholder="https://www.youtube.com/watch?v=... ou https://photos.app.goo.gl/..."
                   className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
@@ -198,14 +206,15 @@ export function CreatePostModal({ onPostCreated }: CreatePostModalProps) {
                   onClick={() => setOpen(false)}
                   className="rounded-xl border border-neutral-800 px-4 py-2 text-xs font-medium text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
-                  Cancelar
+                  {t.socialCancel}
                 </button>
                 <button
                   type="submit"
+                  data-testid="post-submit-btn"
                   disabled={loading || !content.trim()}
                   className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 disabled:opacity-50"
                 >
-                  {loading ? "A publicar..." : "Publicar Agora"}
+                  {loading ? t.socialPosting : t.socialPublishNow}
                 </button>
               </div>
             </form>
