@@ -109,6 +109,11 @@ NewProject/
   - Gravação persistente no banco de dados Neon PostgreSQL (`social_comments`) com atualização imediata sem recarregar a página.
 - **Criador de Publicações com Deteção de Links**:
   - Modal intuitivo com deteção automática de URLs do YouTube e do Google Fotos, associando o player e metadados instantaneamente.
+- **Máquina Fotográfica e Gravador de Vídeo Integrados**:
+  - **Captura Fotográfica Direta**: Abertura da câmara do dispositivo (webcam no desktop ou câmara frontal/traseira no telemóvel via `getUserMedia` e `<canvas>`), permitindo tirar fotos em tempo real com flash visual, pré-visualização instantânea, otimização automática de resolução e anexação direta à publicação.
+  - **Gravação de Vídeo em Tempo Real**: Gravador de vídeo integrado (`MediaRecorder`) com áudio, temporizador em direto (limite recomendado de 30s para partilha rápida), indicador `REC`, revisão antes da publicação e reprodutor HTML5 (`VideoPlayerCard`) incorporado no feed.
+  - **Upload de Arquivos Multimédia**: Botões dedicados para carregamento de fotografias e vídeos do dispositivo, com fallback nativo para captura do sistema operativo.
+  - **Filtro de Vídeos no Feed**: Aba de filtro dedicada para navegar facilmente por publicações contendo vídeos gravados e do YouTube.
 
 ---
 

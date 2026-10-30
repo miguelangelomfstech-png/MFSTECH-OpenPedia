@@ -95,32 +95,34 @@ export function CommentBox({
 
       {/* Formulário de Envio de Comentário */}
       <form onSubmit={handleSubmit} className="space-y-2 mb-4" data-testid="comment-form">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             data-testid="comment-author-input"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
             placeholder={t.socialYourName}
-            className="w-1/3 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full sm:w-1/3 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[40px]"
           />
-          <input
-            type="text"
-            data-testid="comment-content-input"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={t.socialCommentPlaceholder}
-            required
-            className="flex-1 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            data-testid="comment-submit-btn"
-            disabled={loading || !content.trim()}
-            className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 disabled:opacity-50 shrink-0"
-          >
-            {loading ? "..." : t.socialCommentBtn}
-          </button>
+          <div className="flex flex-1 gap-2">
+            <input
+              type="text"
+              data-testid="comment-content-input"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={t.socialCommentPlaceholder}
+              required
+              className="flex-1 rounded-xl border border-neutral-800 bg-neutral-900/90 px-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[40px]"
+            />
+            <button
+              type="submit"
+              data-testid="comment-submit-btn"
+              disabled={loading || !content.trim()}
+              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-md hover:shadow-blue-900/30 active:scale-95 disabled:opacity-50 shrink-0 min-h-[40px]"
+            >
+              {loading ? "..." : t.socialCommentBtn}
+            </button>
+          </div>
         </div>
 
         {error && (

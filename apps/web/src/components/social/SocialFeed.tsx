@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { YouTubePlayerCard } from "./YouTubePlayerCard";
 import { GooglePhotosCard } from "./GooglePhotosCard";
+import { VideoPlayerCard } from "./VideoPlayerCard";
 import { CommentBox, CommentData } from "./CommentBox";
 import { CreatePostModal } from "./CreatePostModal";
 import { dict, type Locale } from "@/lib/i18n-config";
+import { isVideoUrl } from "@/lib/social-media";
 
 export interface SocialPostData {
   id: string;
@@ -39,7 +41,7 @@ export function SocialFeed({
   isAdmin = false,
 }: SocialFeedProps) {
   const [posts, setPosts] = useState<SocialPostData[]>(initialPosts);
-  const [filter, setFilter] = useState<"all" | "youtube" | "google_photos">("all");
+  const [filter, setFilter] = useState<"all" | "youtube" | "google_photos" | "videos">("all");
   const [loading, setLoading] = useState(false);
 
   const t = dict[currentLocale] || dict.pt;
@@ -92,7 +94,10 @@ export function SocialFeed({
       return post.mediaType === "youtube" || !!post.youtubeVideoId;
     }
     if (filter === "google_photos") {
-      return post.mediaType === "google_photos" || !!post.googlePhotosUrl;
+      return (post.mediaType === "google_photos" || !!post.googlePhotosUrl) && !isVideoUrl(post.googlePhotosUrl || "");
+    }
+    if (filter === "videos") {
+      return post.mediaType === "external" || isVideoUrl(post.googlePhotosUrl || "") || post.mediaType === "youtube" || !!post.youtubeVideoId;
     }
     return true;
   });
@@ -141,6 +146,19 @@ export function SocialFeed({
           >
             <span>📷</span>
             <span>{t.socialGooglePhotos}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter("videos")}
+            id="filter-videos-btn"
+            className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
+              filter === "videos"
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/30"
+                : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+            }`}
+          >
+            <span>📹</span>
+            <span>{t.socialDirectVideos}</span>
           </button>
         </div>
 
@@ -243,8 +261,17 @@ export function SocialFeed({
                   />
                 )}
 
-                {/* Google Fotos (Visualizador + Link direto) */}
-                {post.googlePhotosUrl && (
+                {/* Vídeo Gravado / Direto (Player HTML5 Integrado) */}
+                {post.googlePhotosUrl && isVideoUrl(post.googlePhotosUrl) && (
+                  <VideoPlayerCard
+                    videoUrl={post.googlePhotosUrl}
+                    title={post.title}
+                    currentLocale={currentLocale}
+                  />
+                )}
+
+                {/* Google Fotos / Fotografia (Visualizador + Link direto) */}
+                {post.googlePhotosUrl && !isVideoUrl(post.googlePhotosUrl) && (
                   <GooglePhotosCard
                     googlePhotosUrl={post.googlePhotosUrl}
                     title={post.googlePhotosTitle || post.title}

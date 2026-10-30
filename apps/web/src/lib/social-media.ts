@@ -62,6 +62,18 @@ export function isDirectImageUrl(url: string): boolean {
   return false;
 }
 
+export function isVideoUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  // 1. Data URLs para vídeos gravados ou enviados pelo utilizador
+  if (/^data:video\/[a-zA-Z0-9+.-]+;base64,/i.test(trimmed)) return true;
+  // 2. Ficheiros diretos de vídeo (.mp4, .webm, .ogg, .mov, .m4v)
+  if (/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(trimmed)) return true;
+  // 3. URLs com indicação clara de stream de vídeo
+  if (/blob:http/i.test(trimmed)) return true;
+  return false;
+}
+
 export function normalizePhotoUrl(url: string): string {
   if (!url || typeof url !== "string") return "";
   const trimmed = url.trim();

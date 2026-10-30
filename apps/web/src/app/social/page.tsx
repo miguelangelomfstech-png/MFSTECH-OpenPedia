@@ -54,12 +54,12 @@ export default async function SocialPage() {
   return (
     <div className="space-y-8">
       {/* Hero Banner do MFSTECH SOCIAL */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900/90 via-neutral-900/50 to-neutral-950 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+      <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900/90 via-neutral-900/50 to-neutral-950 p-5 sm:p-8 shadow-2xl backdrop-blur-md">
         <div className="relative z-10 max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-bold text-blue-400">
             <span>🚀 {t.socialBadge}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white">
             {t.socialHeroTitle}
           </h1>
           <p className="text-sm text-neutral-300 leading-relaxed">
@@ -74,7 +74,13 @@ export default async function SocialPage() {
               <span className="text-blue-400">📷</span> {t.socialGooglePhotos}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-green-400">💬</span> {t.socialComments}
+              <span className="text-purple-400">📸</span> {t.socialCameraTitle}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-emerald-400">📹</span> {t.socialRecordVideo}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-amber-400">💬</span> {t.socialComments}
             </span>
           </div>
         </div>

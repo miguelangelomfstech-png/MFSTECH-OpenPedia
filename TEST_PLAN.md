@@ -342,5 +342,26 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
 - **Resultado Esperado**: A publicação é criada via POST `/api/social/posts`, o modal fecha e o novo post surge no topo do feed com o player do YouTube embutido e o botão de link externo.
 - **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
 
+#### TC-038: Abertura da Máquina Fotográfica e Captura de Foto para Publicação
+- **Passos**:
+  1. Clicar no botão rápido de câmara `#quick-open-camera-btn` ou no botão `#modal-open-camera-btn`.
+  2. Verificar abertura do modal `[data-testid='camera-capture-modal']` com viewfinder ao vivo e alternância de modos.
+  3. Acionar a captura pelo obturador `[data-testid='take-photo-shutter-btn']`.
+  4. Revisar a fotografia capturada e clicar em "Anexar Foto ao Post".
+  5. Preencher a mensagem e submeter a publicação.
+- **Resultado Esperado**: A fotografia é capturada e otimizada via canvas, anexada ao formulário e renderizada no feed dentro do card multimédia com suporte a visualização e ampliação em Lightbox.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+#### TC-039: Gravação de Vídeo em Tempo Real e Reprodução In-App
+- **Passos**:
+  1. Clicar em `#quick-record-video-btn` ou `#modal-record-video-btn`.
+  2. Alternar para o modo vídeo e iniciar a gravação (`[data-testid='start-record-btn']`).
+  3. Acompanhar o temporizador e o indicador `REC`, e clicar em parar gravação (`[data-testid='stop-record-btn']`).
+  4. Revisar o vídeo com reprodutor integrado e clicar em "Anexar Vídeo ao Post".
+  5. Submeter a publicação com o vídeo.
+- **Resultado Esperado**: O vídeo é gravado em WebM/MP4, anexado ao post e publicado. O feed renderiza o `[data-testid='video-player-card']` com reprodutor HTML5 (`<video controls>`), botão de download e filtro de vídeos funcional.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+
 
 

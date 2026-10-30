@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, socialPosts, socialComments, desc, eq } from "@wiki/db";
-import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl, normalizePhotoUrl } from "@/lib/social-media";
+import { extractYouTubeVideoId, isGooglePhotosUrl, isYouTubeUrl, isVideoUrl, normalizePhotoUrl } from "@/lib/social-media";
 import { getViewer } from "@/lib/viewer";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "O conteúdo da publicação é obrigatório." }, { status: 400 });
     }
 
-    let mediaType: "none" | "youtube" | "google_photos" = "none";
+    let mediaType: "none" | "youtube" | "google_photos" | "external" = "none";
     let youtubeVideoId: string | null = null;
     let youtubeUrl: string | null = null;
     let googlePhotosUrl: string | null = null;
@@ -77,6 +77,9 @@ export async function POST(req: Request) {
           youtubeVideoId = vid;
           youtubeUrl = potentialUrl;
         }
+      } else if (isVideoUrl(potentialUrl)) {
+        mediaType = "external";
+        googlePhotosUrl = potentialUrl;
       } else if (isGooglePhotosUrl(potentialUrl)) {
         mediaType = "google_photos";
         googlePhotosUrl = normalizePhotoUrl(potentialUrl);

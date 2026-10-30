@@ -294,6 +294,96 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     await closeLightboxBtn.click();
     await expect(lightboxModal).not.toBeVisible();
   });
+
+  test("inclui opção de abrir a máquina fotográfica e gravar vídeo com anexação ao post", async ({ page }) => {
+    await page.goto("/social");
+
+    // Fecha banner RGPD se visível
+    const rgpdBtn = page.locator("button:has-text('Aceitar Todos'), button:has-text('Apenas Necessários')").first();
+    if (await rgpdBtn.isVisible()) {
+      await rgpdBtn.click();
+    }
+
+    // 1. Valida a presença dos atalhos rápidos da câmara na barra superior do feed
+    const quickCameraBtn = page.locator("#quick-open-camera-btn");
+    const quickVideoBtn = page.locator("#quick-record-video-btn");
+    await expect(quickCameraBtn).toBeVisible();
+    await expect(quickVideoBtn).toBeVisible();
+
+    // 2. Abre o modal da Máquina Fotográfica
+    await quickCameraBtn.click();
+    const cameraModal = page.locator("[data-testid='camera-capture-modal']");
+    await expect(cameraModal).toBeVisible();
+
+    // Valida botões de modo da câmara (Foto e Vídeo)
+    const modePhotoBtn = cameraModal.locator("[data-testid='camera-mode-photo-btn']");
+    const modeVideoBtn = cameraModal.locator("[data-testid='camera-mode-video-btn']");
+    await expect(modePhotoBtn).toBeVisible();
+    await expect(modeVideoBtn).toBeVisible();
+
+    // No modo foto, deve existir o obturador ou fallback
+    const shutterBtn = cameraModal.locator("[data-testid='take-photo-shutter-btn']");
+    const fallbackPhotoBtn = cameraModal.locator("button:has-text('Tirar Foto (Dispositivo)')");
+    const hasPhotoControl = (await shutterBtn.isVisible()) || (await fallbackPhotoBtn.isVisible());
+    expect(hasPhotoControl).toBe(true);
+
+    // Alterna para o modo gravação de vídeo
+    await modeVideoBtn.click();
+    const startRecordBtn = cameraModal.locator("[data-testid='start-record-btn']");
+    const fallbackVideoBtn = cameraModal.locator("button:has-text('Gravar Vídeo (Dispositivo)')");
+    const hasVideoControl = (await startRecordBtn.isVisible()) || (await fallbackVideoBtn.isVisible());
+    expect(hasVideoControl).toBe(true);
+
+    // Fecha o modal da câmara
+    const closeCameraBtn = cameraModal.locator("[data-testid='close-camera-modal-btn']");
+    await closeCameraBtn.click();
+    await expect(cameraModal).not.toBeVisible();
+
+    // 3. Valida os botões de câmara e gravação de vídeo dentro do modal de criação de post
+    const openCreateBtn = page.locator("#open-create-post-btn");
+    await openCreateBtn.click();
+    const createModal = page.locator("div[role='dialog']");
+    await expect(createModal).toBeVisible();
+
+    const modalCameraBtn = createModal.locator("#modal-open-camera-btn");
+    const modalRecordBtn = createModal.locator("#modal-record-video-btn");
+    await expect(modalCameraBtn).toBeVisible();
+    await expect(modalRecordBtn).toBeVisible();
+
+    // 4. Cria uma publicação com vídeo gravado / anexado e valida a renderização do VideoPlayerCard
+    const videoPostTitle = `Vídeo Gravado MFSTECH ${Date.now()}`;
+    await createModal.locator("[data-testid='post-title-input']").fill(videoPostTitle);
+    await createModal.locator("[data-testid='post-content-input']").fill("Publicação com vídeo gravado diretamente da câmara.");
+
+    // Simula um vídeo em base64 (cabeçalho de vídeo válido)
+    const sampleVideoUrl = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb21tcDQxAAAACHByZW1vAAAAMG1vb3YAAABsbXZoZAAAAABAAAAAAAAAAAAAAAEA";
+    await createModal.locator("[data-testid='post-media-input']").fill(sampleVideoUrl);
+
+    // Submete a publicação com vídeo
+    await createModal.locator("[data-testid='post-submit-btn']").click();
+    await expect(createModal).not.toBeVisible({ timeout: 30000 });
+
+    // 5. Valida que o post aparece no feed com o reprodutor HTML5 de vídeo
+    const createdVideoPost = page.locator(`article:has-text('${videoPostTitle}')`);
+    await expect(createdVideoPost).toBeVisible({ timeout: 30000 });
+
+    const videoCard = createdVideoPost.locator("[data-testid='video-player-card']");
+    await expect(videoCard).toBeVisible();
+
+    const videoElement = videoCard.locator("video[data-testid='social-video-element']");
+    await expect(videoElement).toBeVisible();
+    await expect(videoElement).toHaveAttribute("src", sampleVideoUrl);
+
+    // Valida presença do botão de download de vídeo
+    const downloadLink = videoCard.locator("[data-testid='video-download-link']");
+    await expect(downloadLink).toBeVisible();
+
+    // 6. Valida o filtro de vídeos
+    const filterVideosBtn = page.locator("#filter-videos-btn");
+    await expect(filterVideosBtn).toBeVisible();
+    await filterVideosBtn.click();
+    await expect(createdVideoPost).toBeVisible();
+  });
 });
 
 

@@ -75,6 +75,46 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); 
 .diff-add { background: color-mix(in srgb, #16a34a 22%, transparent); }
 .diff-del { background: color-mix(in srgb, #dc2626 22%, transparent); }
 
+/* Responsive mobile and tablet enhancements */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal overflow from tables and pre code blocks on mobile */
+.wiki-body table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wiki-body pre, .wiki-body code {
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.wiki-body pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch improvements */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
