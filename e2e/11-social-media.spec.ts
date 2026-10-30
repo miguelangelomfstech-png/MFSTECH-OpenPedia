@@ -323,14 +323,14 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
 
     // No modo foto, deve existir o obturador ou fallback
     const shutterBtn = cameraModal.locator("[data-testid='take-photo-shutter-btn']");
-    const fallbackPhotoBtn = cameraModal.locator("button:has-text('Tirar Foto (Dispositivo)')");
+    const fallbackPhotoBtn = cameraModal.locator("button:has-text('Tirar Foto (Dispositivo)'), button:has-text('Tirar Foto Agora')");
     const hasPhotoControl = (await shutterBtn.isVisible()) || (await fallbackPhotoBtn.isVisible());
     expect(hasPhotoControl).toBe(true);
 
     // Alterna para o modo gravação de vídeo
     await modeVideoBtn.click();
     const startRecordBtn = cameraModal.locator("[data-testid='start-record-btn']");
-    const fallbackVideoBtn = cameraModal.locator("button:has-text('Gravar Vídeo (Dispositivo)')");
+    const fallbackVideoBtn = cameraModal.locator("button:has-text('Gravar Vídeo (Dispositivo)'), button:has-text('Gravar Vídeo Agora')");
     const hasVideoControl = (await startRecordBtn.isVisible()) || (await fallbackVideoBtn.isVisible());
     expect(hasVideoControl).toBe(true);
 

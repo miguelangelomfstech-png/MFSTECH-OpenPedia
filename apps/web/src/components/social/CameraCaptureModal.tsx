@@ -65,7 +65,11 @@ export function CameraCaptureModal({
     setPermissionError(null);
 
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      setPermissionError(t.socialCameraPermissionError);
+      if (mode === "photo") {
+        photoFallbackInputRef.current?.click();
+      } else {
+        videoFallbackInputRef.current?.click();
+      }
       return;
     }
 
@@ -112,10 +116,14 @@ export function CameraCaptureModal({
         videoRef.current.play().catch(() => {});
       }
     } catch (err: any) {
-      console.warn("Erro ao aceder à câmara:", err);
-      setPermissionError(t.socialCameraPermissionError);
+      console.warn("Acesso direto WebRTC indisponível, a acionar câmara do sistema:", err);
+      if (mode === "photo") {
+        photoFallbackInputRef.current?.click();
+      } else {
+        videoFallbackInputRef.current?.click();
+      }
     }
-  }, [facingMode, mode, stopTracks, t.socialCameraPermissionError]);
+  }, [facingMode, mode, stopTracks]);
 
   // Quando o modal abre ou o modo/câmara muda
   useEffect(() => {
@@ -427,25 +435,27 @@ export function CameraCaptureModal({
             </>
           )}
 
-          {/* 4. Erro de Permissão / Suporte */}
-          {permissionError && !capturedPhoto && !recordedVideoUrl && (
+          {/* 4. Opção de Dispositivo / Conexão */}
+          {!stream && !capturedPhoto && !recordedVideoUrl && (
             <div className="p-6 text-center space-y-3">
-              <span className="text-3xl">⚠️</span>
-              <p className="text-xs text-red-400 max-w-sm">{permissionError}</p>
-              <div className="flex flex-wrap justify-center gap-2 pt-2">
+              <span className="text-3xl animate-bounce">📸</span>
+              <p className="text-xs text-neutral-300 max-w-sm">
+                Aceder à câmara do telemóvel ou dispositivo:
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => photoFallbackInputRef.current?.click()}
-                  className="rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-300"
+                  className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md active:scale-95"
                 >
-                  📷 Tirar Foto (Dispositivo)
+                  📷 Tirar Foto Agora
                 </button>
                 <button
                   type="button"
                   onClick={() => videoFallbackInputRef.current?.click()}
-                  className="rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-300"
+                  className="rounded-xl bg-red-600 hover:bg-red-500 px-4 py-2 text-xs font-bold text-white shadow-md active:scale-95"
                 >
-                  📹 Gravar Vídeo (Dispositivo)
+                  📹 Gravar Vídeo Agora
                 </button>
               </div>
             </div>

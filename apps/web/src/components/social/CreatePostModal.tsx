@@ -32,7 +32,38 @@ export function CreatePostModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const cameraPhotoInputRef = useRef<HTMLInputElement>(null);
+  const cameraVideoInputRef = useRef<HTMLInputElement>(null);
   const t = dict[currentLocale] || dict.pt;
+
+  const isMobileDevice = () => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent || "";
+    const isTouch = navigator.maxTouchPoints > 0;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+      (isTouch && window.innerWidth <= 1024)
+    );
+  };
+
+  // Acionamento inteligente: no telemóvel abre a câmara nativa diretamente, no desktop abre o visor
+  const handleTriggerTakePhoto = () => {
+    if (isMobileDevice()) {
+      cameraPhotoInputRef.current?.click();
+    } else {
+      setCameraModalMode("photo");
+      setCameraModalOpen(true);
+    }
+  };
+
+  const handleTriggerRecordVideo = () => {
+    if (isMobileDevice()) {
+      cameraVideoInputRef.current?.click();
+    } else {
+      setCameraModalMode("video");
+      setCameraModalOpen(true);
+    }
+  };
 
   const detectedYouTubeId = isYouTubeUrl(mediaUrl) ? extractYouTubeVideoId(mediaUrl) : null;
   const detectedGooglePhotos = (isGooglePhotosUrl(mediaUrl) || !!photoPreview) && !videoPreview;
@@ -92,6 +123,7 @@ export function CreatePostModal({
           setVideoPreview(null);
           setMediaUrl(compressedDataUrl);
           setError(null);
+          setOpen(true);
         }
       };
       img.src = event.target?.result as string;
@@ -121,6 +153,7 @@ export function CreatePostModal({
       setPhotoPreview(null);
       setMediaUrl(result);
       setError(null);
+      setOpen(true);
     };
     reader.readAsDataURL(file);
   };
@@ -218,10 +251,7 @@ export function CreatePostModal({
         <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-neutral-800/60">
           <button
             type="button"
-            onClick={() => {
-              setCameraModalMode("photo");
-              setCameraModalOpen(true);
-            }}
+            onClick={handleTriggerTakePhoto}
             id="quick-open-camera-btn"
             className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 text-xs font-semibold text-blue-300 transition-all active:scale-95 shadow-sm"
           >
@@ -231,10 +261,7 @@ export function CreatePostModal({
 
           <button
             type="button"
-            onClick={() => {
-              setCameraModalMode("video");
-              setCameraModalOpen(true);
-            }}
+            onClick={handleTriggerRecordVideo}
             id="quick-record-video-btn"
             className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-300 transition-all active:scale-95 shadow-sm"
           >
@@ -255,6 +282,24 @@ export function CreatePostModal({
           </button>
         </div>
       </div>
+
+      {/* Inputs nativos para abertura direta da câmara no telemóvel */}
+      <input
+        ref={cameraPhotoInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+      <input
+        ref={cameraVideoInputRef}
+        type="file"
+        accept="video/*"
+        capture="environment"
+        onChange={handleVideoUpload}
+        className="hidden"
+      />
 
       {/* Modal da Câmara / Gravador de Vídeo */}
       <CameraCaptureModal
@@ -351,10 +396,7 @@ export function CreatePostModal({
                     {/* Botão Máquina Fotográfica */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setCameraModalMode("photo");
-                        setCameraModalOpen(true);
-                      }}
+                      onClick={handleTriggerTakePhoto}
                       id="modal-open-camera-btn"
                       className="inline-flex items-center gap-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 px-2.5 py-1 text-[11px] font-semibold text-blue-300 transition-colors"
                       title={t.socialTakePhoto}
@@ -366,10 +408,7 @@ export function CreatePostModal({
                     {/* Botão Gravar Vídeo */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setCameraModalMode("video");
-                        setCameraModalOpen(true);
-                      }}
+                      onClick={handleTriggerRecordVideo}
                       id="modal-record-video-btn"
                       className="inline-flex items-center gap-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 px-2.5 py-1 text-[11px] font-semibold text-red-300 transition-colors"
                       title={t.socialRecordVideo}
