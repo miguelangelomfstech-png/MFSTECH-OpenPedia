@@ -23,6 +23,7 @@ export function CreatePostModal({
   const [authorName, setAuthorName] = useState(currentUser?.name ?? "");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [youtubeInputUrl, setYoutubeInputUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -170,11 +171,45 @@ export function CreatePostModal({
 
   const handleRemoveVideo = () => {
     setVideoPreview(null);
+    setYoutubeInputUrl("");
     if (mediaUrl.startsWith("data:video/")) {
       setMediaUrl("");
     }
     if (videoInputRef.current) {
       videoInputRef.current.value = "";
+    }
+    if (cameraVideoInputRef.current) {
+      cameraVideoInputRef.current.value = "";
+    }
+  };
+
+  // Guarda o vídeo capturado no dispositivo e abre o YouTube Upload
+  const handleSaveAndOpenYouTube = () => {
+    if (!videoPreview) return;
+    try {
+      const a = document.createElement("a");
+      a.href = videoPreview;
+      a.download = `video-mfstech-${Date.now()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {}
+
+    window.open("https://www.youtube.com/upload", "_blank");
+  };
+
+  // Vincula o link do YouTube gerado e remove os bytes pesados de vídeo para poupar o servidor
+  const handleLinkYouTubeVideo = () => {
+    const url = youtubeInputUrl.trim();
+    if (!url) return;
+    if (isYouTubeUrl(url)) {
+      setVideoPreview(null);
+      setPhotoPreview(null);
+      setMediaUrl(url);
+      setYoutubeInputUrl("");
+      setError(null);
+    } else {
+      setError("Por favor, introduza um link válido do YouTube (ex.: https://www.youtube.com/watch?v=... ou https://youtu.be/...)");
     }
   };
 
@@ -210,6 +245,7 @@ export function CreatePostModal({
       setMediaUrl("");
       setPhotoPreview(null);
       setVideoPreview(null);
+      setYoutubeInputUrl("");
       setOpen(false);
 
       if (onPostCreated) {
@@ -530,6 +566,47 @@ export function CreatePostModal({
                       playsInline
                       className="max-h-48 w-full object-contain"
                     />
+                  </div>
+
+                  {/* Assistente de Publicação no YouTube (Poupa armazenamento da Vercel) */}
+                  <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 space-y-2.5">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-400">
+                      <span className="text-base">▶️</span>
+                      <span>{t.socialYouTubeHostingTip}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveAndOpenYouTube}
+                      id="save-and-open-youtube-btn"
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 px-3.5 py-2 text-xs font-bold text-white transition-all shadow-md active:scale-95"
+                    >
+                      <span>⬇️</span>
+                      <span>{t.socialOpenYouTubeUpload}</span>
+                    </button>
+
+                    <div className="space-y-1.5 pt-1">
+                      <label className="block text-[11px] font-semibold text-neutral-300">
+                        {t.socialPasteYouTubeLinkPrompt}
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={youtubeInputUrl}
+                          onChange={(e) => setYoutubeInputUrl(e.target.value)}
+                          placeholder="https://youtu.be/... ou https://www.youtube.com/watch?v=..."
+                          className="flex-1 rounded-lg border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-xs text-white placeholder-neutral-500 focus:border-red-500 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleLinkYouTubeVideo}
+                          id="link-youtube-video-btn"
+                          className="rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors shrink-0"
+                        >
+                          {t.socialLinkYouTubeBtn}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

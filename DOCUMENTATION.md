@@ -114,6 +114,7 @@ NewProject/
   - **Gravação de Vídeo em Tempo Real**: Gravador de vídeo integrado (`MediaRecorder`) com áudio, temporizador em direto (limite recomendado de 30s para partilha rápida), indicador `REC`, revisão antes da publicação e reprodutor HTML5 (`VideoPlayerCard`) incorporado no feed.
   - **Upload de Arquivos Multimédia**: Botões dedicados para carregamento de fotografias e vídeos do dispositivo, com fallback nativo para captura do sistema operativo.
   - **Filtro de Vídeos no Feed**: Aba de filtro dedicada para navegar facilmente por publicações contendo vídeos gravados e do YouTube.
+  - **Fluxo de Otimização e Hospedagem no YouTube**: Para evitar consumo de armazenamento no servidor da Vercel e base de dados, o criador de posts disponibiliza o botão "Guardar no dispositivo e Abrir YouTube ↗", permitindo ao utilizador enviar o vídeo capturado para o seu canal do YouTube e vincular o link gerado diretamente no post. O vídeo é executado pelo player do YouTube in-app com zero bytes consumidos na infraestrutura da Vercel.
 
 ---
 

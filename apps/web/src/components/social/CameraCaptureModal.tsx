@@ -565,7 +565,25 @@ export function CameraCaptureModal({
 
           {/* Ações após Vídeo Gravado */}
           {recordedVideoUrl && (
-            <div className="flex items-center gap-2 w-full justify-between sm:justify-end">
+            <div className="flex flex-wrap items-center gap-2 w-full justify-between sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    const a = document.createElement("a");
+                    a.href = recordedVideoUrl;
+                    a.download = `video-mfstech-${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  } catch {}
+                  window.open("https://www.youtube.com/upload", "_blank");
+                }}
+                className="rounded-xl border border-red-500/30 bg-red-600/15 text-red-400 hover:bg-red-600 hover:text-white px-3 py-2 text-xs font-semibold transition-all"
+                title="Guardar no telemóvel/computador e abrir o YouTube"
+              >
+                ▶️ {t.socialSaveAndOpenYouTube}
+              </button>
               <button
                 type="button"
                 onClick={handleRetake}

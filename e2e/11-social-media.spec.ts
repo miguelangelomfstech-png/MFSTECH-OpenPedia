@@ -384,6 +384,38 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     await filterVideosBtn.click();
     await expect(createdVideoPost).toBeVisible();
   });
+
+  test("oferece fluxo assistido para salvar vídeo e vincular link do YouTube", async ({ page }) => {
+    await page.goto("/social");
+
+    // Fecha banner RGPD se visível
+    const rgpdBtn = page.locator("button:has-text('Aceitar Todos'), button:has-text('Apenas Necessários')").first();
+    if (await rgpdBtn.isVisible()) {
+      await rgpdBtn.click();
+    }
+
+    const openBtn = page.locator("#open-create-post-btn");
+    await openBtn.click();
+    const modal = page.locator("div[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    // Simula anexação de vídeo gravado
+    const sampleVideoUrl = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb21tcDQxAAAACHByZW1vAAAAMG1vb3YAAABsbXZoZAAAAABAAAAAAAAAAAAAAAEA";
+    await modal.locator("[data-testid='post-media-input']").fill(sampleVideoUrl);
+
+    // Valida presença do botão "Guardar no dispositivo e Abrir YouTube"
+    const saveAndOpenBtn = modal.locator("#save-and-open-youtube-btn");
+    await expect(saveAndOpenBtn).toBeVisible();
+
+    // Cola um link do YouTube para vincular em substituição aos bytes pesados
+    const youtubeInput = modal.locator("input[placeholder*='youtu']");
+    await youtubeInput.fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    const linkBtn = modal.locator("#link-youtube-video-btn");
+    await linkBtn.click();
+
+    // Valida que o vídeo do YouTube foi detectado e o vídeo pesado removido
+    await expect(modal.locator("text=Vídeo do YouTube detectado")).toBeVisible();
+  });
 });
 
 

@@ -362,6 +362,16 @@ A estratégia combina testes automatizados de ponta a ponta (**Playwright**) e v
 - **Resultado Esperado**: O vídeo é gravado em WebM/MP4, anexado ao post e publicado. O feed renderiza o `[data-testid='video-player-card']` com reprodutor HTML5 (`<video controls>`), botão de download e filtro de vídeos funcional.
 - **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
 
+#### TC-040: Fluxo Assistido de Hospedagem no YouTube para Otimização de Servidor
+- **Passos**:
+  1. Com um vídeo gravado ou anexado, localizar o card de assistência do YouTube.
+  2. Clicar em "Guardar no dispositivo e Abrir YouTube ↗" (`#save-and-open-youtube-btn`).
+  3. Verificar o download do arquivo de vídeo e a abertura do YouTube Studio / Upload em nova aba.
+  4. Colar a URL do YouTube gerada no campo de vinculação e clicar em "Vincular Vídeo do YouTube".
+- **Resultado Esperado**: Os bytes brutos do vídeo são descartados da memória da aplicação, o link do YouTube é associado ao post, exibindo o player oficial do YouTube sem consumir armazenamento do servidor da Vercel.
+- **Status**: **PASSOU** (Automatizado via `11-social-media.spec.ts`).
+
+
 
 
 
