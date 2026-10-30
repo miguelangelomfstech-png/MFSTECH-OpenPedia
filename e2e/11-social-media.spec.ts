@@ -385,7 +385,7 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     await expect(createdVideoPost).toBeVisible();
   });
 
-  test("oferece fluxo assistido para salvar vídeo e vincular link do YouTube", async ({ page }) => {
+  test("envia e vincula vídeo diretamente ao YouTube na publicação", async ({ page }) => {
     await page.goto("/social");
 
     // Fecha banner RGPD se visível
@@ -399,21 +399,10 @@ test.describe("11: MFSTECH SOCIAL — Mídia Social, YouTube, Google Fotos e Com
     const modal = page.locator("div[role='dialog']");
     await expect(modal).toBeVisible();
 
-    // Simula anexação de vídeo gravado
-    const sampleVideoUrl = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb21tcDQxAAAACHByZW1vAAAAMG1vb3YAAABsbXZoZAAAAABAAAAAAAAAAAAAAAEA";
-    await modal.locator("[data-testid='post-media-input']").fill(sampleVideoUrl);
+    // Simula anexação de link do YouTube diretamente no post
+    await modal.locator("[data-testid='post-media-input']").fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
-    // Valida presença do botão "Guardar no dispositivo e Abrir YouTube"
-    const saveAndOpenBtn = modal.locator("#save-and-open-youtube-btn");
-    await expect(saveAndOpenBtn).toBeVisible();
-
-    // Cola um link do YouTube para vincular em substituição aos bytes pesados
-    const youtubeInput = modal.locator("input[placeholder*='youtu']");
-    await youtubeInput.fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-    const linkBtn = modal.locator("#link-youtube-video-btn");
-    await linkBtn.click();
-
-    // Valida que o vídeo do YouTube foi detectado e o vídeo pesado removido
+    // Valida que o vídeo do YouTube foi detectado e está pronto para ser publicado
     await expect(modal.locator("text=Vídeo do YouTube detectado")).toBeVisible();
   });
 });

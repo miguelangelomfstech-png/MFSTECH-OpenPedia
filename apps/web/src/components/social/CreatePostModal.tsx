@@ -23,7 +23,8 @@ export function CreatePostModal({
   const [authorName, setAuthorName] = useState(currentUser?.name ?? "");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
-  const [youtubeInputUrl, setYoutubeInputUrl] = useState("");
+  const [isUploadingToYouTube, setIsUploadingToYouTube] = useState(false);
+  const [youtubeUploadMessage, setYoutubeUploadMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,19 +71,59 @@ export function CreatePostModal({
   const detectedGooglePhotos = (isGooglePhotosUrl(mediaUrl) || !!photoPreview) && !videoPreview;
   const detectedVideo = isVideoUrl(mediaUrl) || !!videoPreview;
 
+  // Envia o vídeo gravado diretamente para o YouTube sem passos manuais
+  const uploadDirectToYouTube = async (videoDataUrl: string) => {
+    setIsUploadingToYouTube(true);
+    setYoutubeUploadMessage("A enviar vídeo diretamente para o YouTube...");
+    setOpen(true);
+
+    try {
+      const res = await fetch("/api/social/youtube-direct-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoData: videoDataUrl,
+          title: title.trim() || `Vídeo MFSTECH SOCIAL - ${new Date().toLocaleTimeString("pt-PT")}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.youtubeUrl) {
+        // Vídeo guardado no YouTube: associa o link diretamente ao post e liberta memória local
+        setVideoPreview(null);
+        setPhotoPreview(null);
+        setMediaUrl(data.youtubeUrl);
+        setYoutubeUploadMessage("✓ Vídeo salvo diretamente no YouTube!");
+      } else {
+        // Fallback: mantém o vídeo anexado para não perder o conteúdo
+        setVideoPreview(videoDataUrl);
+        setPhotoPreview(null);
+        setMediaUrl(videoDataUrl);
+        setYoutubeUploadMessage(null);
+      }
+    } catch (err) {
+      console.warn("Falha no upload direto para o YouTube, mantendo vídeo:", err);
+      setVideoPreview(videoDataUrl);
+      setPhotoPreview(null);
+      setMediaUrl(videoDataUrl);
+      setYoutubeUploadMessage(null);
+    } finally {
+      setIsUploadingToYouTube(false);
+    }
+  };
+
   // Processa a captura da câmara ou gravação de vídeo
-  const handleCameraCapture = (result: { type: "photo" | "video"; dataUrl: string }) => {
+  const handleCameraCapture = async (result: { type: "photo" | "video"; dataUrl: string }) => {
     if (result.type === "photo") {
       setPhotoPreview(result.dataUrl);
       setVideoPreview(null);
       setMediaUrl(result.dataUrl);
+      setError(null);
+      setOpen(true);
     } else {
-      setVideoPreview(result.dataUrl);
-      setPhotoPreview(null);
-      setMediaUrl(result.dataUrl);
+      // Grava o vídeo diretamente no YouTube e coloca o link no site
+      await uploadDirectToYouTube(result.dataUrl);
     }
-    setError(null);
-    setOpen(true); // Garante que o formulário está aberto para preencher texto
   };
 
   // Processa o upload de foto do telemóvel/computador com compressão client-side
@@ -132,7 +173,7 @@ export function CreatePostModal({
     reader.readAsDataURL(file);
   };
 
-  // Processa o upload de ficheiro de vídeo
+  // Processa o upload de ficheiro de vídeo diretamente para o YouTube
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -142,19 +183,15 @@ export function CreatePostModal({
       return;
     }
 
-    if (file.size > 30 * 1024 * 1024) {
-      setError("O vídeo selecionado excede o limite máximo recomendado de 30MB.");
+    if (file.size > 50 * 1024 * 1024) {
+      setError("O vídeo selecionado excede o limite máximo recomendado de 50MB.");
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const result = event.target?.result as string;
-      setVideoPreview(result);
-      setPhotoPreview(null);
-      setMediaUrl(result);
-      setError(null);
-      setOpen(true);
+      await uploadDirectToYouTube(result);
     };
     reader.readAsDataURL(file);
   };
@@ -167,11 +204,14 @@ export function CreatePostModal({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    if (cameraPhotoInputRef.current) {
+      cameraPhotoInputRef.current.value = "";
+    }
   };
 
   const handleRemoveVideo = () => {
     setVideoPreview(null);
-    setYoutubeInputUrl("");
+    setYoutubeUploadMessage(null);
     if (mediaUrl.startsWith("data:video/")) {
       setMediaUrl("");
     }
@@ -180,36 +220,6 @@ export function CreatePostModal({
     }
     if (cameraVideoInputRef.current) {
       cameraVideoInputRef.current.value = "";
-    }
-  };
-
-  // Guarda o vídeo capturado no dispositivo e abre o YouTube Upload
-  const handleSaveAndOpenYouTube = () => {
-    if (!videoPreview) return;
-    try {
-      const a = document.createElement("a");
-      a.href = videoPreview;
-      a.download = `video-mfstech-${Date.now()}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {}
-
-    window.open("https://www.youtube.com/upload", "_blank");
-  };
-
-  // Vincula o link do YouTube gerado e remove os bytes pesados de vídeo para poupar o servidor
-  const handleLinkYouTubeVideo = () => {
-    const url = youtubeInputUrl.trim();
-    if (!url) return;
-    if (isYouTubeUrl(url)) {
-      setVideoPreview(null);
-      setPhotoPreview(null);
-      setMediaUrl(url);
-      setYoutubeInputUrl("");
-      setError(null);
-    } else {
-      setError("Por favor, introduza um link válido do YouTube (ex.: https://www.youtube.com/watch?v=... ou https://youtu.be/...)");
     }
   };
 
@@ -245,7 +255,6 @@ export function CreatePostModal({
       setMediaUrl("");
       setPhotoPreview(null);
       setVideoPreview(null);
-      setYoutubeInputUrl("");
       setOpen(false);
 
       if (onPostCreated) {
@@ -567,47 +576,21 @@ export function CreatePostModal({
                       className="max-h-48 w-full object-contain"
                     />
                   </div>
+                </div>
+              )}
 
-                  {/* Assistente de Publicação no YouTube (Poupa armazenamento da Vercel) */}
-                  <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-400">
-                      <span className="text-base">▶️</span>
-                      <span>{t.socialYouTubeHostingTip}</span>
-                    </div>
+              {/* Indicador de Processamento Direto para o YouTube */}
+              {isUploadingToYouTube && (
+                <div className="flex items-center gap-3 rounded-xl border border-red-500/40 bg-red-950/40 p-3 text-xs text-red-300 animate-pulse">
+                  <span className="flex h-3 w-3 rounded-full bg-red-500 animate-ping" />
+                  <span className="font-semibold">▶️ A processar e enviar vídeo diretamente para o YouTube...</span>
+                </div>
+              )}
 
-                    <button
-                      type="button"
-                      onClick={handleSaveAndOpenYouTube}
-                      id="save-and-open-youtube-btn"
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 px-3.5 py-2 text-xs font-bold text-white transition-all shadow-md active:scale-95"
-                    >
-                      <span>⬇️</span>
-                      <span>{t.socialOpenYouTubeUpload}</span>
-                    </button>
-
-                    <div className="space-y-1.5 pt-1">
-                      <label className="block text-[11px] font-semibold text-neutral-300">
-                        {t.socialPasteYouTubeLinkPrompt}
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={youtubeInputUrl}
-                          onChange={(e) => setYoutubeInputUrl(e.target.value)}
-                          placeholder="https://youtu.be/... ou https://www.youtube.com/watch?v=..."
-                          className="flex-1 rounded-lg border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-xs text-white placeholder-neutral-500 focus:border-red-500 focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleLinkYouTubeVideo}
-                          id="link-youtube-video-btn"
-                          className="rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors shrink-0"
-                        >
-                          {t.socialLinkYouTubeBtn}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              {youtubeUploadMessage && !isUploadingToYouTube && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-2.5 text-xs text-emerald-400">
+                  <span>✓</span>
+                  <span>{youtubeUploadMessage}</span>
                 </div>
               )}
 
